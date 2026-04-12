@@ -131,4 +131,4 @@ Auth and cart state are managed with React context, and the app shell is compose
 
 ## Next Steps For Contributors
 
-When you first pull the repo, the fastest sanity check is to confirm the server connects to MongoDB and that `npm run dev` brings up both apps without errors. After that, the best entry points are the route files in `apps/server/src/routes/` and the page components in `apps/client/src/pages/`.
+When you first pull the repo, the fastest sanity check is to confirm the server connects to MongoDB and that `npm run dev` brings up both apps without errors. After that, the best entry points are the route files in `apps/server/src/routes/` and the page components in `apps/client/src/pages/`
