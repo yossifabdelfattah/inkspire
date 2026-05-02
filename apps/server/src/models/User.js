@@ -9,12 +9,18 @@ const userSchema = new mongoose.Schema(
     email: {
       type: String,
       required: true,
-      unique: true
+      // unique: true -> as we have soft delete the email can not be unique anymore
     },
     password: {
       type: String,
       required: true
-    }
+    },
+    isDeleted: {
+      type: Boolean,
+      default: false
+    },
+    resetPasswordToken: String,
+    resetPasswordExpire: Date
   },
   { timestamps: true }
 );

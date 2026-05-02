@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { useCart } from '../../context/CartContext';
+import { useAuth } from '../../context/AuthContext';
 
 const Nav = styled.nav`
   display: flex;
@@ -19,15 +20,27 @@ const NavLinks = styled.div`
 
 function Navbar() {
   const { totalItems } = useCart();
+  const { user, logout } = useAuth();
 
   return (
     <Nav>
       <Link to="/">InkSpire</Link>
       <NavLinks>
         <Link to="/products">Products</Link>
-        <Link to="/login">Login</Link>
-        <Link to="/register">Register</Link>
         <Link to="/cart">Cart ({totalItems})</Link>
+        {user ? (
+          <>
+            <Link to="/profile"><span>Hello, {user.name}</span></Link>
+            <button onClick={logout} style={{ cursor: 'pointer', background: 'none', border: 'none', color: 'white' }}>
+              Logout
+            </button>
+          </>
+        ) : (
+          <>
+            <Link to="/login">Login</Link>
+            <Link to="/register">Register</Link>
+          </>
+        )}
       </NavLinks>
     </Nav>
   );

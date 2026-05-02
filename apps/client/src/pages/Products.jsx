@@ -1,13 +1,9 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { useCart } from '../context/CartContext';
 import Button from '../components/common/Button';
-
-const sampleProducts = [
-  { _id: '1', name: 'Wireless Headphones', price: 99.99 },
-  { _id: '2', name: 'Mechanical Keyboard', price: 79.99 },
-  { _id: '3', name: 'Gaming Mouse', price: 49.99 }
-];
+import api from '../api/axios';
 
 const Grid = styled.div`
   display: grid;
@@ -27,17 +23,30 @@ const Card = styled.div`
 
 function Products() {
   const { addToCart } = useCart();
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    api.get('/products')
+      .then((res) => setProducts(res.data))
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error}</p>;
 
   return (
     <div>
       <h1>Products</h1>
-      <p>Replace these sample products with API data later.</p>
 
       <Grid>
-        {sampleProducts.map((product) => (
+        {products.map((product) => (
           <Card key={product._id}>
+            {product.imageUrl && <img src={product.imageUrl} alt={product.name} style={{ width: '100%', borderRadius: '8px' }} />}
             <h3>{product.name}</h3>
-            <p>${product.price.toFixed(2)}</p>
+            <p>€{product.price.toFixed(2)}</p>
             <Link to={`/products/${product._id}`}>View details</Link>
             <Button onClick={() => addToCart(product)}>Add to cart</Button>
           </Card>
