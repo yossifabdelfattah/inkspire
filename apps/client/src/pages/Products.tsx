@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import type { Product } from '../types/product';
-import Button from '../components/common/Button';
+import { Button as MantineButton } from '@mantine/core';
 import * as S from './Products.styled';
 
 const sampleProducts: Product[] = [
@@ -20,11 +20,13 @@ function Products() {
 
       <S.Grid>
         {sampleProducts.map((product) => (
-          <S.Card key={product._id}>
+            <S.Card key={product._id}>
             <h3>{product.name}</h3>
             <p>${product.price.toFixed(2)}</p>
             <Link to={`/products/${product._id}`}>View details</Link>
-            <Button onClick={() => addToCart(product)}>Add to cart</Button>
+            <MantineButton size="sm" onClick={() => addToCart(product)}>
+              Add to cart
+            </MantineButton>
           </S.Card>
         ))}
       </S.Grid>

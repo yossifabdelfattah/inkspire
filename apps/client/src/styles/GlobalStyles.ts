@@ -38,8 +38,6 @@ export const GlobalStyles = createGlobalStyle`
     border: none;
     border-radius: ${({ theme }) => theme.radius.sm};
     font: inherit;
-    background: ${({ theme }) => theme.colors.primary};
-    color: #fff;
     transition: background 0.2s, box-shadow 0.2s;
     &:focus {
       outline: 2px solid ${({ theme }) => theme.colors.secondary};

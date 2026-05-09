@@ -2,14 +2,14 @@
   "name": "inkspire",
   "private": true,
   "workspaces": [
-    "apps/new-client",
+    "apps/client",
     "apps/server"
   ],
   "scripts": {
-    "dev": "concurrently \"npm run dev -w apps/new-client\" \"npm run dev -w apps/server\"",
-    "client": "npm run dev -w apps/new-client",
+    "dev": "concurrently \"npm run dev -w apps/client\" \"npm run dev -w apps/server\"",
+    "client": "npm run dev -w apps/client",
     "server": "npm run dev -w apps/server",
-    "install:all": "npm install && npm install -w apps/new-client && npm install -w apps/server"
+    "install:all": "npm install && npm install -w apps/client && npm install -w apps/server"
   },
   "devDependencies": {
     "concurrently": "^9.0.1"

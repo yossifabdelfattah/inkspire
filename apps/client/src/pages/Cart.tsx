@@ -1,5 +1,5 @@
 import type { Product } from '../types/product';
-import Button from '../components/common/Button';
+import { Button as MantineButton } from '@mantine/core';
 import { useCart } from '../context/CartContext';
 
 interface CartItem extends Product {
@@ -44,7 +44,9 @@ function Cart() {
                 />
               </label>
               <div style={{ marginTop: '0.75rem' }}>
-                <Button onClick={() => removeFromCart(item._id)}>Remove</Button>
+                <MantineButton color="red" size="sm" onClick={() => removeFromCart(item._id)}>
+                  Remove
+                </MantineButton>
               </div>
             </div>
           ))}
