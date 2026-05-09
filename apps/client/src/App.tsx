@@ -1,17 +1,17 @@
 import AppRouter from './routes/AppRouter';
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
-import { AppShell, MainContent } from './styles/AppShell';
+import * as S from './styles/AppShell.styled';
 
 function App() {
   return (
-    <AppShell>
+    <S.AppShell>
       <Navbar />
-      <MainContent>
+      <S.MainContent>
         <AppRouter />
-      </MainContent>
+      </S.MainContent>
       <Footer />
-    </AppShell>
+    </S.AppShell>
   );
 }
 

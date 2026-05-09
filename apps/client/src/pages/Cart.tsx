@@ -1,8 +1,18 @@
+import type { Product } from '../types/product';
 import Button from '../components/common/Button';
 import { useCart } from '../context/CartContext';
 
+interface CartItem extends Product {
+  quantity: number;
+}
+
 function Cart() {
-  const { cartItems, updateQuantity, removeFromCart, totalPrice } = useCart();
+  const { cartItems, updateQuantity, removeFromCart, totalPrice } = useCart() as {
+    cartItems: CartItem[];
+    updateQuantity: (id: string, qty: number) => void;
+    removeFromCart: (id: string) => void;
+    totalPrice: number;
+  };
 
   return (
     <div>
