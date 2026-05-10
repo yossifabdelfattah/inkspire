@@ -3,16 +3,10 @@ import { useParams } from 'react-router-dom';
 import { NumberInput, Button, Rating } from '@mantine/core';
 import { motion } from 'framer-motion';
 import type { ProductDetailsRouteParamKey } from '../types';
-import type { Book } from '../types/product';
 import * as S from './ProductDetails.styled';
 import { useCart } from '../context/useCart';
 
-// Mock data for demo — replace with API later
-const SAMPLE_BOOKS: Book[] = [
-  { id: 1, cover: 'https://covers.openlibrary.org/b/id/10523338-L.jpg', title: 'Atomic Habits', author: 'James Clear', price: 18.99, rating: 4.7, inStock: true },
-  { id: 2, cover: 'https://covers.openlibrary.org/b/id/11153213-L.jpg', title: 'The Midnight Library', author: 'Matt Haig', price: 15.49, rating: 4.3, inStock: true },
-  { id: 3, cover: 'https://covers.openlibrary.org/b/id/10958339-L.jpg', title: 'Project Hail Mary', author: 'Andy Weir', price: 22.99, rating: 4.8, inStock: false },
-];
+import SAMPLE_BOOKS from '../mocks/books';
 
 function ProductDetails() {
   const { id } = useParams<ProductDetailsRouteParamKey>();
