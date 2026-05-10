@@ -1,16 +1,18 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { TextInput, PasswordInput, Button, Loader, Alert, Divider } from '@mantine/core';
 import * as S from './Login.styled';
 import { useAuth } from '../context/useAuth';
 
 function Login() {
   const navigate = useNavigate();
-  const auth = useAuth();
+  const location = useLocation();
+  const { login, signInWithGoogle, loading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const redirectTo = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname ?? '/';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,32 +21,22 @@ function Login() {
       setError('Please enter both email and password.');
       return;
     }
-    setLoading(true);
     try {
-      // Placeholder: integrate Firebase Auth here
-      // await firebaseAuth.signInWithEmailAndPassword(email, password)
-      // Simulate async
-      await new Promise((res) => setTimeout(res, 700));
-      auth?.login?.({ _id: 'demo', email });
-      void navigate('/');
+      await login(email, password);
+      void navigate(redirectTo, { replace: true });
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : (typeof err === 'string' ? err : 'Login failed.');
-      setError(msg ?? 'Login failed.');
-    } finally {
-      setLoading(false);
+      setError(err instanceof Error ? err.message : 'Login failed.');
     }
   };
 
-  const handleGoogle = () => {
-    // Placeholder for Google OAuth integration
+  const handleGoogle = async () => {
     setError(null);
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      // after success
-      auth?.login?.({ _id: 'google-demo', email: 'google@demo.com' });
-      void navigate('/');
-    }, 800);
+    try {
+      await signInWithGoogle();
+      void navigate(redirectTo, { replace: true });
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Google sign-in failed.');
+    }
   };
 
   return (
@@ -90,7 +82,7 @@ function Login() {
             <Button type="submit" disabled={loading} aria-disabled={loading}>
               {loading ? <Loader size="xs" /> : 'Sign in'}
             </Button>
-            <Button variant="default" onClick={handleGoogle} disabled={loading} aria-disabled={loading}>
+            <Button type="button" variant="default" onClick={() => { void handleGoogle(); }} disabled={loading} aria-disabled={loading}>
               Sign in with Google
             </Button>
           </S.Actions>
