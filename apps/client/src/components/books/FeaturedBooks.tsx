@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import type { Book } from '../../types/product';
 import BookCard from './BookCard';
 import BookCardSkeleton from './BookCardSkeleton';
-import { Container, Title, SimpleGrid, Text } from '@mantine/core';
+import * as S from './FeaturedBooks.styled';
 
 // Example mock data (replace with API call or props in real app)
 const MOCK_BOOKS: Book[] = [
@@ -70,32 +70,28 @@ function FeaturedBooks({ books: propsBooks, loading: propsLoading, onAddToCart }
   }, [propsBooks, mockData.length]);
 
   return (
-    <Container my="lg">
-      <Title order={2} size="h3" mb="md">
-        Featured Books
-      </Title>
+    <S.Section aria-labelledby="featured-books-heading">
+      <S.Header>
+        <S.Title id="featured-books-heading">Featured Books</S.Title>
+        <S.Subtitle>Curated picks selected for Inkspire readers.</S.Subtitle>
+      </S.Header>
 
       {displayLoading ? (
-        <SimpleGrid cols={4} spacing="lg">
+        <S.Grid>
           {Array.from({ length: 4 }).map((_, i) => (
             <BookCardSkeleton key={i} />
           ))}
-        </SimpleGrid>
+        </S.Grid>
       ) : displayBooks.length === 0 ? (
-        <Text c="dimmed" ta="center" py="lg">
-          No featured books available.
-        </Text>
+        <S.Empty>No featured books available.</S.Empty>
       ) : (
-        <SimpleGrid
-          cols={{ base: 1, xs: 1, sm: 2, md: 3, lg: 4 }}
-          spacing="lg"
-        >
+        <S.Grid>
           {displayBooks.map((book) => (
             <BookCard key={book.id} book={book} onAddToCart={onAddToCart} />
           ))}
-        </SimpleGrid>
+        </S.Grid>
       )}
-    </Container>
+    </S.Section>
   );
 }
 

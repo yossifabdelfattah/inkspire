@@ -36,6 +36,10 @@ export const PaymentCard = styled.div`
   margin-top: ${({ theme }) => theme.spacing.md};
 `;
 
+export const SubmitRow = styled.div`
+  margin-top: 16px;
+`;
+
 export const Summary = styled.aside`
   background: ${({ theme }) => theme.colors.surface};
   border: 1px solid ${({ theme }) => theme.colors.border};

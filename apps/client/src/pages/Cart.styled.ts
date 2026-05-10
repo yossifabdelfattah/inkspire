@@ -79,12 +79,22 @@ export const Controls = styled.div`
   }
 `;
 
+export const RemoveRow = styled.div`
+  display: flex;
+  gap: 8px;
+  align-items: center;
+`;
+
 export const Summary = styled.aside`
   background: ${({ theme }) => theme.colors.surface};
   border: 1px solid ${({ theme }) => theme.colors.border};
   padding: ${({ theme }) => theme.spacing.md};
   border-radius: ${({ theme }) => theme.radius.md};
   height: fit-content;
+`;
+
+export const SummaryAction = styled.div`
+  margin-top: 16px;
 `;
 
 export const SummaryRow = styled.div`
