@@ -1,7 +1,7 @@
 import { AnimatePresence } from 'framer-motion';
 import type { FC } from 'react';
-import { useCart } from '../../context/CartContext';
-import { useAuth } from '../../context/AuthContext';
+import { useCart } from '../../context/useCart';
+import { useAuth } from '../../context/useAuth';
 import * as S from './NavbarMenu.styled';
 
 interface NavbarMenuProps {

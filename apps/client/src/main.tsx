@@ -4,8 +4,8 @@ import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import { GlobalStyles } from './styles/GlobalStyles';
-import { AuthProvider } from './context/AuthContext';
-import { CartProvider } from './context/CartContext';
+import { AuthProvider } from './context/AuthProvider';
+import { CartProvider } from './context/CartProvider';
 import { ThemeProvider } from 'styled-components';
 import theme from './styles/theme';
 import { MantineProvider } from '@mantine/core';

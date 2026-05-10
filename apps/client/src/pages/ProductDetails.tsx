@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import type { ProductDetailsRouteParamKey } from '../types';
 import type { Book } from '../types/product';
 import * as S from './ProductDetails.styled';
-import { useCart } from '../context/CartContext';
+import { useCart } from '../context/useCart';
 
 // Mock data for demo — replace with API later
 const SAMPLE_BOOKS: Book[] = [
