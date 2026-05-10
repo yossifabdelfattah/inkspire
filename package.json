@@ -1,5 +1,5 @@
 {
-  "name": "fullstack-ecommerce",
+  "name": "inkspire",
   "private": true,
   "workspaces": [
     "apps/client",

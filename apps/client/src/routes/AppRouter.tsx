@@ -1,12 +1,12 @@
-import { Routes, Route } from 'react-router-dom';
-import Home from '../pages/Home';
-import Login from '../pages/Login';
-import Register from '../pages/Register';
-import Products from '../pages/Products';
-import ProductDetails from '../pages/ProductDetails';
+import { Route, Routes } from 'react-router-dom';
 import Cart from '../pages/Cart';
 import Checkout from '../pages/Checkout';
+import Home from '../pages/Home';
+import Login from '../pages/Login';
 import NotFound from '../pages/NotFound';
+import ProductDetails from '../pages/ProductDetails';
+import Products from '../pages/Products';
+import Register from '../pages/Register';
 
 function AppRouter() {
   return (

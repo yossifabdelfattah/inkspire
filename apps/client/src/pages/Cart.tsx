@@ -1,8 +1,18 @@
-import Button from '../components/common/Button';
+import type { Product } from '../types/product';
+import { Button as MantineButton } from '@mantine/core';
 import { useCart } from '../context/CartContext';
 
+interface CartItem extends Product {
+  quantity: number;
+}
+
 function Cart() {
-  const { cartItems, updateQuantity, removeFromCart, totalPrice } = useCart();
+  const { cartItems, updateQuantity, removeFromCart, totalPrice } = useCart() as {
+    cartItems: CartItem[];
+    updateQuantity: (id: string, qty: number) => void;
+    removeFromCart: (id: string) => void;
+    totalPrice: number;
+  };
 
   return (
     <div>
@@ -34,7 +44,9 @@ function Cart() {
                 />
               </label>
               <div style={{ marginTop: '0.75rem' }}>
-                <Button onClick={() => removeFromCart(item._id)}>Remove</Button>
+                <MantineButton color="red" size="sm" onClick={() => removeFromCart(item._id)}>
+                  Remove
+                </MantineButton>
               </div>
             </div>
           ))}
