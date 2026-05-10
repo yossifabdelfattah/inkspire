@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { TextInput, PasswordInput, Button, Loader, Alert, Divider } from '@mantine/core';
 import * as S from './Login.styled';
@@ -7,7 +7,7 @@ import { useAuth } from '../context/useAuth';
 function Login() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, signInWithGoogle, loading } = useAuth();
+  const { login, signInWithGoogle, loading, user } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -38,6 +38,13 @@ function Login() {
       setError(err instanceof Error ? err.message : 'Google sign-in failed.');
     }
   };
+
+  // Redirect authenticated users away from auth pages
+  useEffect(() => {
+    if (!loading && user) {
+      void navigate(redirectTo, { replace: true });
+    }
+  }, [user, loading, navigate, redirectTo]);
 
   return (
     <S.Page role="main">
