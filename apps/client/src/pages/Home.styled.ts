@@ -82,3 +82,24 @@ export const HeroImage = styled.img`
   object-fit: cover;
   background: #f3f4f6;
 `;
+
+export const CTAButton = styled.button`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: ${({ theme }) => theme.radius.md};
+  border: none;
+  cursor: pointer;
+  background: ${({ theme }) => theme.colors.secondary};
+  color: #fff;
+  font-weight: 600;
+  font-size: 1.1rem;
+  padding: 0.85rem 2.2rem;
+  min-height: 44px;
+
+  &.outline {
+    background: transparent;
+    border: 2px solid rgba(79,70,229,0.12);
+    color: ${({ theme }) => theme.colors.secondary};
+  }
+`;

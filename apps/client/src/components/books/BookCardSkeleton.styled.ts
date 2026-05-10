@@ -10,4 +10,8 @@ export const Card = styled.div`
   align-items: flex-start;
   gap: ${({ theme }) => theme.spacing.sm};
   min-width: 0;
+
+  & > *:first-child {
+    align-self: center;
+  }
 `;

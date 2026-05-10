@@ -4,7 +4,7 @@ import * as S from './BookCardSkeleton.styled';
 function BookCardSkeleton() {
   return (
     <S.Card>
-      <Skeleton height={200} width={140} radius="sm" style={{ alignSelf: 'center' }} />
+      <Skeleton height={200} width={140} radius="sm" />
       <Skeleton height={18} mt={8} width="90%" radius="sm" />
       <Skeleton height={14} mt={4} width="60%" radius="sm" />
       <Skeleton height={14} mt={4} width="40%" radius="sm" />
