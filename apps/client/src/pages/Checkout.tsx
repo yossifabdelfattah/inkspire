@@ -66,7 +66,7 @@ function Checkout() {
   return (
     <S.Page>
       <S.Container>
-        <S.FormCard as="form" onSubmit={handleSubmit} aria-labelledby="checkout-heading">
+        <S.FormCard as="form" id="checkout-form" onSubmit={handleSubmit} aria-labelledby="checkout-heading">
           <h1 id="checkout-heading">Checkout</h1>
 
           <label htmlFor="fullName">Full name</label>
@@ -132,8 +132,8 @@ function Checkout() {
 
           <Divider my="sm" />
 
-          <Button fullWidth size="md" color="indigo" component={Link} to="/checkout/confirm" aria-disabled={!validate()} disabled={!validate()} aria-label="Proceed to confirm">
-            Continue
+          <Button fullWidth size="md" color="indigo" type="submit" form="checkout-form" aria-disabled={!validate()} disabled={!validate()} aria-label="Place order">
+            Place Order
           </Button>
         </S.Summary>
       </S.Container>

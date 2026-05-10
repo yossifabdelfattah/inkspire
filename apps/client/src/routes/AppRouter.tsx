@@ -1,4 +1,4 @@
-import { Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import Cart from '../pages/Cart';
 import Checkout from '../pages/Checkout';
 import Home from '../pages/Home';
@@ -14,8 +14,10 @@ function AppRouter() {
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
-      <Route path="/products" element={<Products />} />
-      <Route path="/products/:id" element={<ProductDetails />} />
+      <Route path="/books" element={<Products />} />
+      <Route path="/books/:id" element={<ProductDetails />} />
+      <Route path="/products" element={<Navigate to="/books" replace />} />
+      <Route path="/products/:id" element={<Navigate to="/books" replace />} />
       <Route path="/cart" element={<Cart />} />
       <Route path="/checkout" element={<Checkout />} />
       <Route path="*" element={<NotFound />} />

@@ -34,10 +34,10 @@ function Home() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.7, type: 'spring', stiffness: 60 }}
           >
-            <S.CTAButton as={Link} to="/products" aria-label="Browse books">
+            <S.CTAButton as={Link} to="/books" aria-label="Browse books">
               Browse Books
             </S.CTAButton>
-            <S.CTAButton as={Link} to="/products?category=all" className="outline" aria-label="Browse categories">
+            <S.CTAButton as={Link} to="/books?category=all" className="outline" aria-label="Browse categories">
               Browse Categories
             </S.CTAButton>
           </S.CTAGroup>

@@ -1,6 +1,5 @@
 import type { Product } from '../types/product';
 import { Button, NumberInput, Divider, Alert } from '@mantine/core';
-import { } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/useCart';
 import * as S from './Cart.styled';

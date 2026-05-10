@@ -12,7 +12,7 @@ const CTABanner: FC = () => {
       </S.BannerContent>
 
       <div>
-        <Link to="/products" aria-label="Browse books">
+        <Link to="/books" aria-label="Browse books">
           <Button size="md" radius="md" color="dark">Browse Books</Button>
         </Link>
       </div>

@@ -1,0 +1,16 @@
+<svg width="800" height="600" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="600" fill="#ECFDF5"/>
+  <circle cx="120" cy="100" r="70" fill="#D1FAE5"/>
+  <circle cx="680" cy="500" r="80" fill="#A7F3D0"/>
+
+  <rect x="170" y="130" width="460" height="280" rx="20" fill="#FFFFFF" stroke="#6EE7B7" stroke-width="8"/>
+  <rect x="220" y="290" width="60" height="90" rx="8" fill="#10B981"/>
+  <rect x="300" y="250" width="60" height="130" rx="8" fill="#34D399"/>
+  <rect x="380" y="220" width="60" height="160" rx="8" fill="#6EE7B7"/>
+  <rect x="460" y="190" width="60" height="190" rx="8" fill="#A7F3D0"/>
+
+  <line x1="220" y1="210" x2="540" y2="210" stroke="#D1FAE5" stroke-width="8"/>
+  <line x1="220" y1="240" x2="540" y2="240" stroke="#D1FAE5" stroke-width="8"/>
+
+  <text x="400" y="525" text-anchor="middle" fill="#065F46" font-family="Arial, sans-serif" font-size="40" font-weight="700">Non-fiction</text>
+</svg>

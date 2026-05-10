@@ -21,7 +21,7 @@ function Navbar() {
         <S.Brand to="/">InkSpire</S.Brand>
         <S.NavLinks>
           <S.NavLink to="/">Home</S.NavLink>
-          <S.NavLink to="/products">Books</S.NavLink>
+          <S.NavLink to="/books">Books</S.NavLink>
           <S.NavLink to="/cart">Cart ({totalItems})</S.NavLink>
           {user ? (
             <S.NavLink to="/profile">Profile</S.NavLink>

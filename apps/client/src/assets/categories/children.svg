@@ -1,0 +1,16 @@
+<svg width="800" height="600" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="600" fill="#FFF7ED"/>
+  <circle cx="110" cy="120" r="70" fill="#FDE68A"/>
+  <circle cx="690" cy="500" r="90" fill="#FDBA74"/>
+
+  <circle cx="300" cy="260" r="70" fill="#FCA5A5"/>
+  <circle cx="500" cy="260" r="70" fill="#93C5FD"/>
+  <circle cx="400" cy="220" r="85" fill="#86EFAC"/>
+
+  <rect x="250" y="310" width="300" height="140" rx="26" fill="#FFFFFF" stroke="#FDBA74" stroke-width="8"/>
+  <circle cx="340" cy="380" r="12" fill="#FB7185"/>
+  <circle cx="400" cy="380" r="12" fill="#60A5FA"/>
+  <circle cx="460" cy="380" r="12" fill="#34D399"/>
+
+  <text x="400" y="525" text-anchor="middle" fill="#9A3412" font-family="Arial, sans-serif" font-size="42" font-weight="700">Children</text>
+</svg>
