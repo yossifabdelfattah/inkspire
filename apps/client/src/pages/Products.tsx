@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { TextInput, Select, Skeleton } from '@mantine/core';
 import { motion } from 'framer-motion';
 import BookCard from '../components/books/BookCard';
+import { useCart } from '../context/CartContext';
 import type { Book } from '../types/product';
 import * as S from './Products.styled';
 
@@ -49,6 +50,8 @@ function Products() {
     return res;
   }, [books, query, category, sort]);
 
+  const { addToCart } = useCart();
+
   return (
     <S.Page>
       <S.Header>
@@ -82,20 +85,20 @@ function Products() {
       </S.Header>
 
       {loading ? (
-        <S.Grid initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+        <S.Grid initial={{ opacity: 0 }} animate={{ opacity: 1 }} role="status" aria-live="polite" aria-busy="true">
           {Array.from({ length: 6 }).map((_, i) => (
             <Skeleton key={i} height={320} />
           ))}
         </S.Grid>
       ) : error ? (
-        <S.EmptyState>Something went wrong. Please try again later.</S.EmptyState>
+        <S.EmptyState role="alert">Something went wrong. Please try again later.</S.EmptyState>
       ) : filtered.length === 0 ? (
-        <S.EmptyState>No books match your search.</S.EmptyState>
+        <S.EmptyState role="status" aria-live="polite">No books match your search. Try clearing filters.</S.EmptyState>
       ) : (
-        <S.Grid initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ staggerChildren: 0.04 }}>
+        <S.Grid initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ staggerChildren: 0.04 }} role="list" aria-label="Book results">
           {filtered.map((book) => (
-            <motion.div key={book.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}>
-              <BookCard book={book} />
+            <motion.div key={book.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} role="listitem">
+              <BookCard book={book} onAddToCart={(b) => addToCart({ _id: b.id.toString(), name: b.title, price: b.price })} />
             </motion.div>
           ))}
         </S.Grid>
