@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { TextInput, PasswordInput, Button, Loader, Alert, Divider } from '@mantine/core';
 import * as S from './Register.styled';
@@ -7,7 +7,7 @@ import { useAuth } from '../context/useAuth';
 function Register() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { register, signInWithGoogle, loading } = useAuth();
+  const { register, signInWithGoogle, loading, user } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
@@ -43,6 +43,13 @@ function Register() {
       setError(err instanceof Error ? err.message : 'Google sign-in failed.');
     }
   };
+
+  // Redirect authenticated users away from register page when already signed in
+  useEffect(() => {
+    if (!loading && user) {
+      void navigate(redirectTo, { replace: true });
+    }
+  }, [user, loading, navigate, redirectTo]);
 
   return (
     <S.Page role="main">
