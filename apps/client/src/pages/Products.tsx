@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { TextInput, Select, Skeleton } from '@mantine/core';
 import { motion } from 'framer-motion';
 import BookCard from '../components/books/BookCard';
-import { useCart } from '../context/CartContext';
+import { useCart } from '../context/useCart';
 import type { Book } from '../types/product';
 import * as S from './Products.styled';
 
