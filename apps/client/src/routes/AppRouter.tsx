@@ -7,6 +7,7 @@ import NotFound from '../pages/NotFound';
 import ProductDetails from '../pages/ProductDetails';
 import Products from '../pages/Products';
 import Register from '../pages/Register';
+import ProtectedRoute from '../components/auth/ProtectedRoute';
 
 function AppRouter() {
   return (
@@ -19,7 +20,7 @@ function AppRouter() {
       <Route path="/products" element={<Navigate to="/books" replace />} />
       <Route path="/products/:id" element={<Navigate to="/books" replace />} />
       <Route path="/cart" element={<Cart />} />
-      <Route path="/checkout" element={<Checkout />} />
+      <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

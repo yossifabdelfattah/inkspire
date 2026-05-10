@@ -1,17 +1,19 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { TextInput, PasswordInput, Button, Loader, Alert, Divider } from '@mantine/core';
 import * as S from './Register.styled';
 import { useAuth } from '../context/useAuth';
 
 function Register() {
   const navigate = useNavigate();
-  const auth = useAuth();
+  const location = useLocation();
+  const { register, signInWithGoogle, loading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const redirectTo = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname ?? '/';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,29 +26,22 @@ function Register() {
       setError('Passwords do not match.');
       return;
     }
-    setLoading(true);
     try {
-      // Placeholder: integrate Firebase createUserWithEmailAndPassword here
-      await new Promise((res) => setTimeout(res, 700));
-      auth?.login?.({ _id: 'new-demo', email });
-      void navigate('/');
+      await register(email, password);
+      void navigate(redirectTo, { replace: true });
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : (typeof err === 'string' ? err : 'Registration failed.');
-      setError(msg ?? 'Registration failed.');
-    } finally {
-      setLoading(false);
+      setError(err instanceof Error ? err.message : 'Registration failed.');
     }
   };
 
-  const handleGoogle = () => {
-    // Placeholder for Google OAuth integration
+  const handleGoogle = async () => {
     setError(null);
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      auth?.login?.({ _id: 'google-demo', email: 'google@demo.com' });
-      void navigate('/');
-    }, 800);
+    try {
+      await signInWithGoogle();
+      void navigate(redirectTo, { replace: true });
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Google sign-in failed.');
+    }
   };
 
   return (
@@ -104,7 +99,7 @@ function Register() {
             <Button type="submit" disabled={loading} aria-disabled={loading}>
               {loading ? <Loader size="xs" /> : 'Create account'}
             </Button>
-            <Button variant="default" onClick={handleGoogle} disabled={loading} aria-disabled={loading}>
+            <Button type="button" variant="default" onClick={() => { void handleGoogle(); }} disabled={loading} aria-disabled={loading}>
               Continue with Google
             </Button>
           </S.Actions>

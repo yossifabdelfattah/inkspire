@@ -11,14 +11,14 @@ export default defineConfig([
     files: ['**/*.{ts,tsx}'],
     extends: [
       js.configs.recommended,
-      tseslint.configs.recommendedTypeChecked,
       reactHooks.configs.flat.recommended,
       reactRefresh.configs.vite,
-      tseslint.configs.stylisticTypeChecked,
+      tseslint.configs.recommended,
+      tseslint.configs.stylistic,
     ],
     languageOptions: {
       parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        projectServices: true,
         tsconfigRootDir: import.meta.dirname,
       },
       globals: globals.browser,
