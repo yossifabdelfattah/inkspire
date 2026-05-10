@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import type { Book } from '../../types/product';
 import BookCard from './BookCard';
 import BookCardSkeleton from './BookCardSkeleton';
-import * as S from './FeaturedBooks.styled';
+import { Container, Title, SimpleGrid, Text } from '@mantine/core';
 
 // Example mock data (replace with API call or props in real app)
 const MOCK_BOOKS: Book[] = [
@@ -50,52 +50,52 @@ interface FeaturedBooksProps {
   onAddToCart?: (book: Book) => void;
 }
 
-function FeaturedBooks({ books, loading, onAddToCart }: FeaturedBooksProps = {}) {
+function FeaturedBooks({ books: propsBooks, loading: propsLoading, onAddToCart }: FeaturedBooksProps = {}) {
   // For demo, simulate loading and use mock data
-  const [isLoading, setIsLoading] = useState(loading ?? true);
-  const [data, setData] = useState<Book[]>(books ?? []);
+  const [mockData, setMockData] = useState<Book[]>([]);
+  const [isLoading, setIsLoading] = useState(!propsBooks);
+
+  const displayBooks = propsBooks ?? mockData;
+  const displayLoading = propsBooks ? propsLoading : isLoading;
 
   useEffect(() => {
-    if (books) {
-      setData(books);
-      setIsLoading(!!loading);
-    } else {
-      setIsLoading(true);
-      setTimeout(() => {
-        setData(MOCK_BOOKS);
+    if (!propsBooks && mockData.length === 0) {
+      // Only load mock data if no books prop provided and not already loaded
+      const timer = setTimeout(() => {
+        setMockData(MOCK_BOOKS);
         setIsLoading(false);
       }, 1200);
+      return () => clearTimeout(timer);
     }
-  }, [books, loading]);
+  }, [propsBooks, mockData.length]);
 
   return (
-    <S.Section>
-      <S.SectionTitle>Featured Books</S.SectionTitle>
-      {isLoading ? (
-        <S.Grid initial="hidden" animate="visible">
-          {[...Array(4)].map((_, i) => (
+    <Container my="lg">
+      <Title order={2} size="h3" mb="md">
+        Featured Books
+      </Title>
+
+      {displayLoading ? (
+        <SimpleGrid cols={4} spacing="lg">
+          {Array.from({ length: 4 }).map((_, i) => (
             <BookCardSkeleton key={i} />
           ))}
-        </S.Grid>
-      ) : data.length === 0 ? (
-        <S.EmptyState>No featured books available.</S.EmptyState>
+        </SimpleGrid>
+      ) : displayBooks.length === 0 ? (
+        <Text c="dimmed" ta="center" py="lg">
+          No featured books available.
+        </Text>
       ) : (
-        <S.Grid
-          initial="hidden"
-          animate="visible"
-          variants={{
-            hidden: {},
-            visible: {
-              transition: { staggerChildren: 0.08 },
-            },
-          }}
+        <SimpleGrid
+          cols={{ base: 1, xs: 1, sm: 2, md: 3, lg: 4 }}
+          spacing="lg"
         >
-          {data.map((book) => (
+          {displayBooks.map((book) => (
             <BookCard key={book.id} book={book} onAddToCart={onAddToCart} />
           ))}
-        </S.Grid>
+        </SimpleGrid>
       )}
-    </S.Section>
+    </Container>
   );
 }
 

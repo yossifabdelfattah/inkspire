@@ -1,6 +1,5 @@
-import { Button as MantineButton, Rating, Badge } from '@mantine/core';
+import { Card, Image, Text, Group, Badge, Button, Rating } from '@mantine/core';
 import type { Book } from '../../types/product';
-import * as S from './BookCard.styled';
 
 interface BookCardProps {
   book: Book;
@@ -9,29 +8,33 @@ interface BookCardProps {
 
 function BookCard({ book, onAddToCart }: BookCardProps) {
   return (
-    <S.Card whileHover={{ scale: 1.03 }}>
-      <S.Cover src={book.cover} alt={book.title} />
-      <S.Title title={book.title}>{book.title}</S.Title>
-      <S.Author>{book.author}</S.Author>
-      <Rating value={book.rating} fractions={2} readOnly size="sm" />
-      <S.CardFooter>
-        <S.Price>${book.price.toFixed(2)}</S.Price>
-        <Badge color={book.inStock ? 'green' : 'red'} variant="light" style={{ marginLeft: 'auto' }}>
+    <Card shadow="sm" padding="md" radius="md" withBorder>
+      <Card.Section>
+        <Image src={book.cover} alt={book.title} height={200} fit="cover" />
+      </Card.Section>
+
+      <Text fw={700} mt="sm" truncate title={book.title}>
+        {book.title}
+      </Text>
+      <Text size="sm" c="dimmed" truncate>
+        {book.author}
+      </Text>
+
+      <Group justify="space-between" align="center" mt="xs">
+        <Rating value={book.rating} readOnly fractions={2} size="sm" />
+        <Badge color={book.inStock ? 'green' : 'red'} variant="light">
           {book.inStock ? 'In Stock' : 'Out of Stock'}
         </Badge>
-      </S.CardFooter>
-      <MantineButton
-        size="xs"
-        radius="md"
-        color="indigo"
-        fullWidth
-        disabled={!book.inStock}
-        onClick={() => onAddToCart?.(book)}
-        style={{ marginTop: 8 }}
-      >
+      </Group>
+
+      <Group justify="space-between" align="center" mt="md">
+        <Text fw={600} c="blue">${book.price.toFixed(2)}</Text>
+      </Group>
+
+      <Button fullWidth mt="md" radius="md" color="indigo" disabled={!book.inStock} onClick={() => onAddToCart?.(book)}>
         Add to Cart
-      </MantineButton>
-    </S.Card>
+      </Button>
+    </Card>
   );
 }
 
