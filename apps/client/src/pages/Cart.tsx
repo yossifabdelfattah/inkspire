@@ -56,11 +56,11 @@ function Cart() {
                       size="sm"
                     />
 
-                    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                    <S.RemoveRow>
                       <Button color="red" size="sm" onClick={() => removeFromCart(item._id)} aria-label={`Remove ${item.name} from cart`}>
                         Remove
                       </Button>
-                    </div>
+                    </S.RemoveRow>
                   </S.Controls>
                 </S.ItemCard>
               ))}
@@ -90,11 +90,11 @@ function Cart() {
             <Alert color="green">You qualify for free shipping</Alert>
           )}
 
-          <div style={{ marginTop: 16 }}>
+          <S.SummaryAction>
             <Button fullWidth size="md" color="indigo" component={Link} to="/checkout" aria-label="Proceed to checkout">
               Checkout
             </Button>
-          </div>
+          </S.SummaryAction>
         </S.Summary>
       </S.Container>
     </S.Page>

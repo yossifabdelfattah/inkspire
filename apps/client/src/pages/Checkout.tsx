@@ -102,9 +102,9 @@ function Checkout() {
             </RadioGroup>
           </S.PaymentCard>
 
-          <div style={{ marginTop: 16 }}>
+          <S.SubmitRow>
             <Button type="submit" size="md" color="indigo" aria-label="Place order">Place Order</Button>
-          </div>
+          </S.SubmitRow>
         </S.FormCard>
 
         <S.Summary aria-live="polite">
