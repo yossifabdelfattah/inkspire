@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { NumberInput, Button, Rating } from '@mantine/core';
 import { motion } from 'framer-motion';
@@ -7,15 +7,35 @@ import * as S from './ProductDetails.styled';
 import { useCart } from '../context/useCart';
 
 import SAMPLE_BOOKS from '../mocks/books';
+import { getBookById } from '../services/bookService';
 
 function ProductDetails() {
   const { id } = useParams<ProductDetailsRouteParamKey>();
-  const bookId = Number(id);
+  const bookId = id ?? '';
   const { addToCart } = useCart();
 
   const [qty, setQty] = useState(1);
+  const [book, setBook] = useState(() => SAMPLE_BOOKS[0]);
 
-  const book = useMemo(() => SAMPLE_BOOKS.find((b) => b.id === bookId) ?? SAMPLE_BOOKS[0], [bookId]);
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const b = await getBookById(bookId);
+        if (!mounted) return;
+        setBook(b);
+      } catch (err) {
+        if (!mounted) return;
+        // leave fallback book
+      } finally {
+        /* noop */
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, [bookId]);
 
   // reset quantity when bookId changes by recreating component state via key in router
 

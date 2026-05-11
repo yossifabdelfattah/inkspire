@@ -7,6 +7,7 @@ import type { Book } from '../types/product';
 import * as S from './Products.styled';
 
 import SAMPLE_BOOKS from '../mocks/books';
+import { getBooks } from '../services/bookService';
 
 const CATEGORIES = ['All', 'Fiction', 'Non-fiction', 'Sci‑fi', 'Children'];
 
@@ -20,12 +21,23 @@ function Products() {
   const [sort, setSort] = useState('relevance');
 
   useEffect(() => {
-    // simulate loading
-    const t = setTimeout(() => {
-      setBooks(SAMPLE_BOOKS);
-      setLoading(false);
-    }, 600);
-    return () => clearTimeout(t);
+    let mounted = true;
+    (async () => {
+      try {
+        const data = await getBooks();
+        if (!mounted) return;
+        setBooks(data);
+      } catch (err) {
+        if (!mounted) return;
+        setBooks(SAMPLE_BOOKS);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const filtered = useMemo(() => {
