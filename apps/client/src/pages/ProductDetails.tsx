@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { NumberInput, Button, Rating, Alert, Skeleton } from '@mantine/core';
+import { NumberInput, Button, Rating } from '@mantine/core';
 import { motion } from 'framer-motion';
 import type { ProductDetailsRouteParamKey } from '../types';
-import type { Book } from '../types/product';
 import * as S from './ProductDetails.styled';
 import { useCart } from '../context/useCart';
+
+import SAMPLE_BOOKS from '../mocks/books';
 import { getBookById } from '../services/bookService';
 
 function ProductDetails() {
@@ -14,28 +15,20 @@ function ProductDetails() {
   const { addToCart } = useCart();
 
   const [qty, setQty] = useState(1);
-  const [book, setBook] = useState<Book | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [book, setBook] = useState(() => SAMPLE_BOOKS[0]);
 
   useEffect(() => {
     let mounted = true;
-
     (async () => {
       try {
         const b = await getBookById(bookId);
         if (!mounted) return;
-        
-        if (b === null) {
-          setError('Book not found');
-        } else {
-          setBook(b);
-        }
+        setBook(b);
       } catch (err) {
         if (!mounted) return;
-        setError(`Failed to load book: ${err instanceof Error ? err.message : 'Unknown error'}`);
+        // leave fallback book
       } finally {
-        if (mounted) setLoading(false);
+        /* noop */
       }
     })();
 
@@ -44,34 +37,7 @@ function ProductDetails() {
     };
   }, [bookId]);
 
-  if (loading) {
-    return (
-      <S.Page as={motion.main} initial={{ opacity: 0 }} animate={{ opacity: 1 }} role="main">
-        <S.Layout>
-          <div>
-            <Skeleton height={400} circle={false} mb="lg" />
-          </div>
-          <S.Meta>
-            <Skeleton height={30} mb="xs" />
-            <Skeleton height={20} mb="lg" width="60%" />
-            <Skeleton height={100} mb="lg" />
-          </S.Meta>
-        </S.Layout>
-      </S.Page>
-    );
-  }
-
-  if (error || !book) {
-    return (
-      <S.Page as={motion.main} initial={{ opacity: 0 }} animate={{ opacity: 1 }} role="main">
-        <S.Layout>
-          <Alert title={error ? 'Error' : 'Not Found'} color="red" role="alert">
-            {error || 'The book you are looking for does not exist.'}
-          </Alert>
-        </S.Layout>
-      </S.Page>
-    );
-  }
+  // reset quantity when bookId changes by recreating component state via key in router
 
   const handleAddToCart = () => {
     // Map `Book` to `Product` shape expected by cart context
