@@ -27,7 +27,7 @@ function Products() {
         const data = await getBooks();
         if (!mounted) return;
         setBooks(data);
-      } catch (err) {
+      } catch {
         if (!mounted) return;
         setBooks(SAMPLE_BOOKS);
       } finally {
