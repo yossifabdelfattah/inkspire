@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { TextInput, Select, Skeleton } from '@mantine/core';
 import { motion } from 'framer-motion';
 import BookCard from '../components/books/BookCard';
@@ -9,26 +9,46 @@ import * as S from './Products.styled';
 import SAMPLE_BOOKS from '../mocks/books';
 import { getBooks } from '../services/bookService';
 
-const CATEGORIES = ['All', 'Fiction', 'Non-fiction', 'Sci‑fi', 'Children'];
+const CATEGORIES = ['All', 'Fiction', 'Programming', 'Self-help', 'Science Fiction', 'Mystery', 'History', 'Fantasy', 'Biography'];
 
 function Products() {
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const [query, setQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
   const [category, setCategory] = useState('All');
   const [sort, setSort] = useState('relevance');
 
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedQuery(query);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [query]);
+
+  // Fetch books when filters change
   useEffect(() => {
     let mounted = true;
+
     (async () => {
+      setLoading(true);
+      setError(null);
+
       try {
-        const data = await getBooks();
+        const data = await getBooks({
+          search: debouncedQuery,
+          category,
+          sort: sort !== 'relevance' ? sort : undefined,
+        });
         if (!mounted) return;
         setBooks(data);
       } catch {
         if (!mounted) return;
+        setError('Failed to fetch books');
         setBooks(SAMPLE_BOOKS);
       } finally {
         if (mounted) setLoading(false);
@@ -38,23 +58,7 @@ function Products() {
     return () => {
       mounted = false;
     };
-  }, []);
-
-  const filtered = useMemo(() => {
-    let res = books.slice();
-    if (query.trim()) {
-      const q = query.toLowerCase();
-      res = res.filter((b) => b.title.toLowerCase().includes(q) || b.author.toLowerCase().includes(q));
-    }
-    if (category !== 'All') {
-      // naive category filtering based on title/author for demo
-      res = res.filter((b) => b.title.toLowerCase().includes(category.toLowerCase()) || b.author.toLowerCase().includes(category.toLowerCase()));
-    }
-    if (sort === 'price-asc') res.sort((a, b) => a.price - b.price);
-    if (sort === 'price-desc') res.sort((a, b) => b.price - a.price);
-    if (sort === 'rating') res.sort((a, b) => b.rating - a.rating);
-    return res;
-  }, [books, query, category, sort]);
+  }, [debouncedQuery, category, sort]);
 
   const { addToCart } = useCart();
 
@@ -82,7 +86,7 @@ function Products() {
           />
 
           <Select
-            data={[{ value: 'relevance', label: 'Relevance' }, { value: 'price-asc', label: 'Price: Low to High' }, { value: 'price-desc', label: 'Price: High to Low' }, { value: 'rating', label: 'Top Rated' }]}
+            data={[{ value: 'relevance', label: 'Relevance' }, { value: 'price-asc', label: 'Price: Low to High' }, { value: 'price-desc', label: 'Price: High to Low' }, { value: 'rating', label: 'Top Rated' }, { value: 'newest', label: 'Newest' }]}
             value={sort}
             onChange={(v) => setSort(v ?? 'relevance')}
             aria-label="Sort books"
@@ -97,12 +101,12 @@ function Products() {
           ))}
         </S.Grid>
       ) : error ? (
-        <S.EmptyState role="alert">Something went wrong. Please try again later.</S.EmptyState>
-      ) : filtered.length === 0 ? (
+        <S.EmptyState role="alert">{error}</S.EmptyState>
+      ) : books.length === 0 ? (
         <S.EmptyState role="status" aria-live="polite">No books match your search. Try clearing filters.</S.EmptyState>
       ) : (
         <S.Grid initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ staggerChildren: 0.04 }} role="list" aria-label="Book results">
-          {filtered.map((book) => (
+          {books.map((book) => (
             <motion.div key={book.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} role="listitem">
               <BookCard book={book} onAddToCart={(b) => addToCart({ _id: b.id.toString(), name: b.title, price: b.price })} />
             </motion.div>
