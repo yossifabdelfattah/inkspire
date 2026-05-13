@@ -1,9 +1,51 @@
 const Book = require("../models/Book");
 
-// GET all books
+// GET all books with search, filter, and sort
 const getBooks = async (req, res) => {
   try {
-    const books = await Book.find();
+    const { search, category, minPrice, maxPrice, sort } = req.query;
+    
+    // Build filter object
+    const filter = {};
+    
+    // Search: match title or author case-insensitively
+    if (search) {
+      filter.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { author: { $regex: search, $options: 'i' } },
+      ];
+    }
+    
+    // Category filter
+    if (category && category !== 'All') {
+      filter.category = category;
+    }
+    
+    // Price range filter
+    if (minPrice || maxPrice) {
+      filter.price = {};
+      if (minPrice) {
+        filter.price.$gte = parseFloat(minPrice);
+      }
+      if (maxPrice) {
+        filter.price.$lte = parseFloat(maxPrice);
+      }
+    }
+    
+    // Build sort object
+    let sortObj = {};
+    if (sort === 'price-asc') {
+      sortObj = { price: 1 };
+    } else if (sort === 'price-desc') {
+      sortObj = { price: -1 };
+    } else if (sort === 'rating') {
+      sortObj = { ratingAverage: -1 };
+    } else if (sort === 'newest') {
+      sortObj = { createdAt: -1 };
+    }
+    
+    // Execute query
+    const books = await Book.find(filter).sort(sortObj);
 
     res.status(200).json(books);
   } catch (error) {
