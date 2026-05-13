@@ -15,8 +15,6 @@ const importData = async () => {
     // clear existing books
     await Book.deleteMany();
 
-    console.log(books);
-
     // insert sample books
     await Book.insertMany(books);
 
