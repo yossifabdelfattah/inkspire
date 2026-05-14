@@ -45,8 +45,8 @@ export async function getBooks(params?: GetBooksParams): Promise<Book[]> {
       if (items.length > 0) return items.map((it, i) => mapToBook(it, i));
       return [];
     }
-  } catch {
-    // Fall back to mock data only on API failure
+  } catch (err) {
+    console.error('[bookService] getBooks failed, using mock data:', err);
   }
 
   return SAMPLE_BOOKS;
