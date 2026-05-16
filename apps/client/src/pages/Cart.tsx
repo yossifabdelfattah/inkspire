@@ -1,22 +1,10 @@
-import type { Product } from '../types/product';
 import { Button, NumberInput, Divider, Alert } from '@mantine/core';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/useCart';
 import * as S from './Cart.styled';
 
-interface CartItem extends Product {
-  quantity: number;
-  cover?: string;
-  author?: string;
-}
-
 function Cart() {
-  const { cartItems, updateQuantity, removeFromCart, totalPrice } = useCart() as {
-    cartItems: CartItem[];
-    updateQuantity: (id: string, qty: number) => void;
-    removeFromCart: (id: string) => void;
-    totalPrice: number;
-  };
+  const { cartItems, updateQuantity, removeFromCart, clearCart, totalPrice } = useCart();
 
   const freeShippingThreshold = 50;
   const shippingCost = totalPrice >= freeShippingThreshold ? 0 : 4.99;
@@ -37,12 +25,12 @@ function Cart() {
           ) : (
             <S.Items aria-live="polite">
               {cartItems.map((item) => (
-                <S.ItemCard key={item._id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}>
-                  <S.Cover src={item.cover ?? '/placeholder-cover.png'} alt={item.name} loading="lazy" />
+                <S.ItemCard key={item.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}>
+                  <S.Cover src={item.cover} alt={item.title} loading="lazy" />
 
                   <S.Info>
-                    <S.Title>{item.name}</S.Title>
-                    <S.Author>{item.author ?? ''}</S.Author>
+                    <S.Title>{item.title}</S.Title>
+                    <S.Author>{item.author}</S.Author>
                     <S.Price>${item.price.toFixed(2)}</S.Price>
                   </S.Info>
 
@@ -50,19 +38,22 @@ function Cart() {
                     <NumberInput
                       value={item.quantity}
                       min={1}
-                      onChange={(v) => updateQuantity(item._id, Number(v ?? 1))}
-                      aria-label={`Quantity for ${item.name}`}
+                      onChange={(v) => updateQuantity(item.id, Number(v ?? 1))}
+                      aria-label={`Quantity for ${item.title}`}
                       size="sm"
                     />
-
                     <S.RemoveRow>
-                      <Button color="red" size="sm" onClick={() => removeFromCart(item._id)} aria-label={`Remove ${item.name} from cart`}>
+                      <Button color="red" size="sm" onClick={() => removeFromCart(item.id)} aria-label={`Remove ${item.title} from cart`}>
                         Remove
                       </Button>
                     </S.RemoveRow>
                   </S.Controls>
                 </S.ItemCard>
               ))}
+
+              <Button variant="subtle" color="red" onClick={clearCart}>
+                Clear cart
+              </Button>
             </S.Items>
           )}
         </section>

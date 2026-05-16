@@ -108,7 +108,7 @@ function Products() {
         <S.Grid initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ staggerChildren: 0.04 }} role="list" aria-label="Book results">
           {books.map((book) => (
             <motion.div key={book.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} role="listitem">
-              <BookCard book={book} onAddToCart={(b) => addToCart({ _id: b.id.toString(), name: b.title, price: b.price })} />
+              <BookCard book={book} onAddToCart={(b) => addToCart(b)} />
             </motion.div>
           ))}
         </S.Grid>
