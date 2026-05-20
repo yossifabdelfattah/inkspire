@@ -1,13 +1,15 @@
-import { Navigate, Route, Routes } from 'react-router-dom';
-import Cart from '../pages/Cart';
-import Checkout from '../pages/Checkout';
-import Home from '../pages/Home';
-import Login from '../pages/Login';
-import NotFound from '../pages/NotFound';
-import ProductDetails from '../pages/ProductDetails';
-import Products from '../pages/Products';
-import Register from '../pages/Register';
-import ProtectedRoute from '../components/auth/ProtectedRoute';
+import { Navigate, Route, Routes } from "react-router-dom";
+import Cart from "../pages/Cart";
+import Checkout from "../pages/Checkout";
+import Home from "../pages/Home";
+import Login from "../pages/Login";
+import NotFound from "../pages/NotFound";
+import ProductDetails from "../pages/ProductDetails";
+import Products from "../pages/Products";
+import Register from "../pages/Register";
+import Orders from "../pages/Orders";
+
+import ProtectedRoute from "../components/auth/ProtectedRoute";
 
 function AppRouter() {
   return (
@@ -20,7 +22,22 @@ function AppRouter() {
       <Route path="/products" element={<Navigate to="/books" replace />} />
       <Route path="/products/:id" element={<Navigate to="/books" replace />} />
       <Route path="/cart" element={<Cart />} />
-      <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
+      <Route
+        path="/checkout"
+        element={
+          <ProtectedRoute>
+            <Checkout />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/orders"
+        element={
+          <ProtectedRoute>
+            <Orders />
+          </ProtectedRoute>
+        }
+      />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
