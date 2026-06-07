@@ -8,6 +8,7 @@ import ProductDetails from "../pages/ProductDetails";
 import Products from "../pages/Products";
 import Register from "../pages/Register";
 import Orders from "../pages/Orders";
+import Profile from "../pages/Profile";
 
 import ProtectedRoute from "../components/auth/ProtectedRoute";
 
@@ -35,6 +36,14 @@ function AppRouter() {
         element={
           <ProtectedRoute>
             <Orders />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <Profile />
           </ProtectedRoute>
         }
       />
