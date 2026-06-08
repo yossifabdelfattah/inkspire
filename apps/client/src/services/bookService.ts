@@ -22,6 +22,7 @@ function mapToBook(item: BookApiItem, index = 0): Book {
     author: item.author ?? 'Unknown Author',
     price: item.price,
     rating: item.ratingAverage ?? 0,
+    ratingCount: item.ratingCount ?? 0,
     inStock: (item.stock ?? 0) > 0,
   };
 }

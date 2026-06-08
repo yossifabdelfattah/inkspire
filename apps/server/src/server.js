@@ -1,8 +1,10 @@
 const express = require('express');
+const http = require('http');
 const cors = require('cors');
 const morgan = require('morgan');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
+const { initSocket } = require('./config/socket');
 const authRoutes = require('./routes/authRoutes');
 // legacy productRoutes removed in favor of books API
 const cartRoutes = require('./routes/cartRoutes');
@@ -15,6 +17,7 @@ connectDB();
 const bookRoutes = require("./routes/bookRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const bookRequestRoutes = require("./routes/bookRequestRoutes");
+const reviewRoutes = require("./routes/reviewRoutes");
 
 const app = express();
 
@@ -30,14 +33,18 @@ app.use('/api/auth', authRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/orders', orderRoutes);
 app.use("/api/books", bookRoutes);
+app.use("/api/books/:bookId/reviews", reviewRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/book-requests", bookRequestRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
 
+const httpServer = http.createServer(app);
+initSocket(httpServer);
+
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+httpServer.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 

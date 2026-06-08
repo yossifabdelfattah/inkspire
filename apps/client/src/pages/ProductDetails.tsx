@@ -7,6 +7,7 @@ import type { Book } from '../types/product';
 import * as S from './ProductDetails.styled';
 import { useCart } from '../context/useCart';
 import { getBookById } from '../services/bookService';
+import ReviewsSection from '../components/books/ReviewsSection';
 
 function ProductDetails() {
   const { id } = useParams<ProductDetailsRouteParamKey>();
@@ -121,7 +122,7 @@ function ProductDetails() {
 
           <S.Section>
             <S.SectionTitle>Reviews & Comments</S.SectionTitle>
-            <S.Placeholder role="region" aria-label="Reviews placeholder">Realtime comments and reviews will appear here (future feature).</S.Placeholder>
+            <ReviewsSection bookId={book.id} ratingAverage={book.rating} ratingCount={book.ratingCount} />
           </S.Section>
 
           <S.Section>
