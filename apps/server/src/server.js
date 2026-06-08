@@ -1,8 +1,10 @@
+const dotenv = require('dotenv');
+dotenv.config();
+
 const express = require('express');
 const http = require('http');
 const cors = require('cors');
 const morgan = require('morgan');
-const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const { initSocket } = require('./config/socket');
 const authRoutes = require('./routes/authRoutes');
@@ -11,7 +13,6 @@ const cartRoutes = require('./routes/cartRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 
-dotenv.config();
 connectDB();
 
 const bookRoutes = require("./routes/bookRoutes");

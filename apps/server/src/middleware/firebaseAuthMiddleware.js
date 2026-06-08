@@ -19,6 +19,15 @@ const verifyFirebaseToken = async (req, res, next) => {
 
     let user = await User.findOne({ firebaseUid: decoded.uid });
 
+    if (!user && decoded.email) {
+      // Link an existing account (e.g. created via the legacy email/password flow) to this Firebase UID
+      user = await User.findOne({ email: decoded.email });
+      if (user && !user.firebaseUid) {
+        user.firebaseUid = decoded.uid;
+        await user.save();
+      }
+    }
+
     if (!user) {
       user = await User.create({
         name: decoded.name || decoded.email || 'Unnamed User',
