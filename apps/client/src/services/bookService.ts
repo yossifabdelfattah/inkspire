@@ -12,8 +12,8 @@ interface GetBooksParams {
 }
 
 function mapToBook(item: BookApiItem, index = 0): Book {
-  const productId = item._id ?? index + 1;
-  const id = typeof productId === 'number' ? productId : Number(productId) || index + 1;
+  // Always use the MongoDB _id as a string; fall back to index-based string
+  const id: string = item._id ? String(item._id) : String(index + 1);
 
   return {
     id,

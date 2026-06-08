@@ -74,9 +74,7 @@ function ProductDetails() {
   }
 
   const handleAddToCart = () => {
-    // Map `Book` to `Product` shape expected by cart context
-    const product = { _id: book.id.toString(), name: book.title, price: book.price };
-    for (let i = 0; i < qty; i++) addToCart(product);
+    for (let i = 0; i < qty; i++) addToCart(book);
   };
 
   return (

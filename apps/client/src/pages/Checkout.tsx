@@ -112,8 +112,8 @@ function Checkout() {
           <Divider my="sm" />
           <div>
             {cartItems.map((it) => (
-              <S.SummaryRow key={it._id}>
-                <div>{it.name}</div>
+              <S.SummaryRow key={it.id}>
+                <div>{it.title}</div>
                 <div>${(it.price * it.quantity).toFixed(2)}</div>
               </S.SummaryRow>
             ))}
