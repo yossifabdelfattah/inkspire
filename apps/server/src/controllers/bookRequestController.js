@@ -62,4 +62,27 @@ const getBookRequests = async (req, res) => {
   }
 };
 
-module.exports = { createBookRequest, getBookRequests };
+// PATCH /api/book-requests/:id (admin) — approve or reject a request
+const updateBookRequestStatus = async (req, res) => {
+  try {
+    const { status } = req.body;
+
+    if (!['pending', 'approved', 'rejected'].includes(status)) {
+      return res.status(400).json({ message: 'Status must be pending, approved, or rejected' });
+    }
+
+    const request = await BookRequest.findByIdAndUpdate(req.params.id, { status }, { new: true });
+    if (!request) {
+      return res.status(404).json({ message: 'Book request not found' });
+    }
+
+    res.status(200).json(request);
+  } catch (error) {
+    res.status(500).json({
+      message: 'Failed to update book request',
+      error: error.message,
+    });
+  }
+};
+
+module.exports = { createBookRequest, getBookRequests, updateBookRequestStatus };

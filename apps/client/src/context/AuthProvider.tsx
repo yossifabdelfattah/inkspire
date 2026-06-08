@@ -10,6 +10,7 @@ import {
   signInWithGoogle,
   subscribeToAuthState,
 } from '../services/authService';
+import { getMyProfile } from '../services/userService';
 import type { UserProfile } from '../types/auth';
 
 interface AuthProviderProps {
@@ -24,6 +25,16 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
     const unsubscribe = subscribeToAuthState((currentUser) => {
       setUser(currentUser);
       setLoading(false);
+
+      if (currentUser) {
+        getMyProfile()
+          .then((profile) => {
+            setUser((prev) => (prev ? { ...prev, role: profile.role } : prev));
+          })
+          .catch(() => {
+            // Role stays undefined if the backend profile can't be fetched
+          });
+      }
     });
 
     return unsubscribe;

@@ -36,7 +36,10 @@ const NavbarMenu: FC<NavbarMenuProps> = ({ open, onClose }) => {
             <S.MenuLink to="/request-a-book" onClick={onClose}>Request a Book</S.MenuLink>
             <S.MenuLink to="/cart" onClick={onClose}>Cart ({totalItems})</S.MenuLink>
             {user ? (
-              <S.MenuLink to="/profile" onClick={onClose}>Profile</S.MenuLink>
+              <>
+                <S.MenuLink to="/profile" onClick={onClose}>Profile</S.MenuLink>
+                {user.role === 'admin' && <S.MenuLink to="/admin" onClick={onClose}>Admin</S.MenuLink>}
+              </>
             ) : (
               <>
                 <S.MenuLink to="/login" onClick={onClose}>Login</S.MenuLink>

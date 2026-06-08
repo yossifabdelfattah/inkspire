@@ -25,7 +25,10 @@ function Navbar() {
           <S.NavLink to="/request-a-book">Request a Book</S.NavLink>
           <S.NavLink to="/cart">Cart ({totalItems})</S.NavLink>
           {user ? (
-            <S.NavLink to="/profile">Profile</S.NavLink>
+            <>
+              <S.NavLink to="/profile">Profile</S.NavLink>
+              {user.role === 'admin' && <S.NavLink to="/admin">Admin</S.NavLink>}
+            </>
           ) : (
             <>
               <S.NavLink to="/login">Login</S.NavLink>
