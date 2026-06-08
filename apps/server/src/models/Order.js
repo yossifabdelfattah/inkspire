@@ -11,13 +11,43 @@ const orderSchema = new mongoose.Schema(
       {
         product: {
           type: mongoose.Schema.Types.ObjectId,
-          ref: 'Book'
+          ref: 'Book',
+          required: true
         },
-        name: String,
-        quantity: Number,
-        price: Number
+        title: String,
+        quantity: {
+          type: Number,
+          required: true,
+          min: 1
+        },
+        price: {
+          type: Number,
+          required: true,
+          min: 0
+        }
       }
     ],
+    shippingInfo: {
+      fullName: { type: String, required: true },
+      email: { type: String, required: true },
+      address: { type: String, required: true },
+      city: { type: String, required: true },
+      postal: { type: String, required: true },
+      country: { type: String, required: true }
+    },
+    paymentMethod: {
+      type: String,
+      enum: ['card', 'paypal', 'cod'],
+      default: 'card'
+    },
+    itemsPrice: {
+      type: Number,
+      required: true
+    },
+    shippingPrice: {
+      type: Number,
+      required: true
+    },
     totalPrice: {
       type: Number,
       required: true

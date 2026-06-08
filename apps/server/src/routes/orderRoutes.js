@@ -1,9 +1,9 @@
 const express = require('express');
 const { createOrder, getMyOrders } = require('../controllers/orderController');
-const { protect } = require('../middleware/authMiddleware');
+const { verifyFirebaseToken } = require('../middleware/firebaseAuthMiddleware');
 
 const router = express.Router();
 
-router.route('/').post(protect, createOrder).get(protect, getMyOrders);
+router.route('/').post(verifyFirebaseToken, createOrder).get(verifyFirebaseToken, getMyOrders);
 
 module.exports = router;
