@@ -14,6 +14,7 @@ connectDB();
 
 const bookRoutes = require("./routes/bookRoutes");
 const adminRoutes = require("./routes/adminRoutes");
+const bookRequestRoutes = require("./routes/bookRequestRoutes");
 
 const app = express();
 
@@ -30,6 +31,7 @@ app.use('/api/cart', cartRoutes);
 app.use('/api/orders', orderRoutes);
 app.use("/api/books", bookRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/book-requests", bookRequestRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

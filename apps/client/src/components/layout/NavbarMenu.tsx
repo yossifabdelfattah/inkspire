@@ -33,6 +33,7 @@ const NavbarMenu: FC<NavbarMenuProps> = ({ open, onClose }) => {
             <S.CloseButton onClick={onClose} aria-label="Close menu">×</S.CloseButton>
             <S.MenuLink to="/" onClick={onClose}>Home</S.MenuLink>
             <S.MenuLink to="/books" onClick={onClose}>Books</S.MenuLink>
+            <S.MenuLink to="/request-a-book" onClick={onClose}>Request a Book</S.MenuLink>
             <S.MenuLink to="/cart" onClick={onClose}>Cart ({totalItems})</S.MenuLink>
             {user ? (
               <S.MenuLink to="/profile" onClick={onClose}>Profile</S.MenuLink>
