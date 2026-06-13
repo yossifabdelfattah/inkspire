@@ -14,6 +14,7 @@ interface GetBooksParams {
 function mapToBook(item: BookApiItem, index = 0): Book {
   // Always use the MongoDB _id as a string; fall back to index-based string
   const id: string = item._id ? String(item._id) : String(index + 1);
+  const availableStock = Math.max(0, (item.stock ?? 0) - (item.reservedStock ?? 0));
 
   return {
     id,
@@ -23,7 +24,8 @@ function mapToBook(item: BookApiItem, index = 0): Book {
     price: item.price,
     rating: item.ratingAverage ?? 0,
     ratingCount: item.ratingCount ?? 0,
-    inStock: (item.stock ?? 0) > 0,
+    inStock: availableStock > 0,
+    availableStock,
   };
 }
 

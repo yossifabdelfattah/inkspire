@@ -59,3 +59,7 @@ export const Empty = styled.div`
   text-align: center;
   padding: ${({ theme }) => theme.spacing.lg};
 `;
+
+export const StepperWrap = styled.div`
+  margin-bottom: ${({ theme }) => theme.spacing.lg};
+`;

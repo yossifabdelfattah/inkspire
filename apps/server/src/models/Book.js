@@ -43,6 +43,14 @@ const bookSchema = new mongoose.Schema(
       default: 0,
     },
 
+    // Quantity currently held by active (unexpired) checkout reservations.
+    // Available stock for new reservations is `stock - reservedStock`.
+    reservedStock: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+
     ratingAverage: {
       type: Number,
       default: 0,

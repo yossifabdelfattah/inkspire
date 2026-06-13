@@ -11,9 +11,13 @@ const authRoutes = require('./routes/authRoutes');
 // legacy productRoutes removed in favor of books API
 const cartRoutes = require('./routes/cartRoutes');
 const orderRoutes = require('./routes/orderRoutes');
+const reservationRoutes = require('./routes/reservationRoutes');
+const checkoutRoutes = require('./routes/checkoutRoutes');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
+const { startReservationCleanupJob } = require('./services/reservationCleanupService');
 
 connectDB();
+startReservationCleanupJob();
 
 const bookRoutes = require("./routes/bookRoutes");
 const adminRoutes = require("./routes/adminRoutes");
@@ -34,6 +38,8 @@ app.get('/', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/reservations', reservationRoutes);
+app.use('/api/checkout', checkoutRoutes);
 app.use("/api/books", bookRoutes);
 app.use("/api/books/:bookId/reviews", reviewRoutes);
 app.use("/api/admin", adminRoutes);

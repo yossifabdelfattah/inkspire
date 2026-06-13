@@ -1,76 +1,126 @@
-import { useState } from 'react';
-import { TextInput, Button, Radio, RadioGroup, Divider, Alert } from '@mantine/core';
-import { Link } from 'react-router-dom';
+import { useCallback, useState } from 'react';
+import { Stepper, Alert, Button, Divider } from '@mantine/core';
+import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/useCart';
-import { createOrder } from '../services/orderService';
+import { createReservation } from '../services/reservationService';
+import type { Reservation } from '../services/reservationService';
+import { checkout } from '../services/checkoutService';
+import type { CheckoutResult, DeliveryMethod } from '../services/checkoutService';
+import type { ShippingInfo } from '../services/orderService';
+import CartReviewStep from '../components/checkout/CartReviewStep';
+import ShippingStep from '../components/checkout/ShippingStep';
+import DeliveryStep from '../components/checkout/DeliveryStep';
+import PaymentStep from '../components/checkout/PaymentStep';
+import ConfirmationStep from '../components/checkout/ConfirmationStep';
 import * as S from './Checkout.styled';
+import * as StepS from '../components/checkout/CheckoutSteps.styled';
 
-type SubmitStatus = 'idle' | 'loading' | 'success' | 'error';
+const STEP_LABELS = ['Cart Review', 'Shipping', 'Delivery', 'Payment', 'Confirmation'];
+
+const EMPTY_SHIPPING: ShippingInfo = { fullName: '', email: '', address: '', city: '', postal: '', country: '' };
+
+const FREE_SHIPPING_THRESHOLD = 50;
+const EXPRESS_SHIPPING_COST = 14.99;
+const STANDARD_SHIPPING_COST = 4.99;
+
+function getShippingPrice(deliveryMethod: DeliveryMethod, itemsPrice: number) {
+  if (deliveryMethod === 'express') return EXPRESS_SHIPPING_COST;
+  return itemsPrice >= FREE_SHIPPING_THRESHOLD ? 0 : STANDARD_SHIPPING_COST;
+}
+
+function getApiErrorMessage(err: unknown, fallback: string) {
+  const response = (err as { response?: { data?: { message?: string } } })?.response;
+  return response?.data?.message ?? fallback;
+}
 
 function Checkout() {
   const { cartItems, totalPrice, clearCart } = useCart();
-  const [form, setForm] = useState({ fullName: '', email: '', address: '', city: '', postal: '', country: '' });
-  const [payment, setPayment] = useState('card');
-  const [status, setStatus] = useState<SubmitStatus>('idle');
-  const [errorMessage, setErrorMessage] = useState('');
+  const navigate = useNavigate();
 
-  const freeShippingThreshold = 50;
-  const shippingCost = totalPrice >= freeShippingThreshold ? 0 : 4.99;
+  const [step, setStep] = useState(0);
+  const [reservation, setReservation] = useState<Reservation | null>(null);
+  const [reservationLoading, setReservationLoading] = useState(false);
+  const [reservationError, setReservationError] = useState<string | null>(null);
+  const [expired, setExpired] = useState(false);
 
-  const handleChange = (key: string, value: string) => {
-    setForm((s) => ({ ...s, [key]: value }));
-  };
+  const [shippingInfo, setShippingInfo] = useState<ShippingInfo>(EMPTY_SHIPPING);
+  const [deliveryMethod, setDeliveryMethod] = useState<DeliveryMethod>('standard');
+  const [paymentMethod, setPaymentMethod] = useState('card');
 
-  const validate = () => {
-    const required = ['fullName', 'email', 'address', 'city', 'postal', 'country'];
-    return required.every((k) => form[k as keyof typeof form].trim().length > 0);
-  };
+  const [checkoutResult, setCheckoutResult] = useState<CheckoutResult | null>(null);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleExpire = useCallback(() => {
+    setExpired(true);
+  }, []);
 
-    if (!validate() || status === 'loading') return;
-
-    setStatus('loading');
-    setErrorMessage('');
+  const handleReserve = async () => {
+    setReservationLoading(true);
+    setReservationError(null);
 
     try {
-      await createOrder({
-        cartItems: cartItems.map((item) => ({ id: item.id, quantity: item.quantity })),
-        shippingInfo: form,
-        paymentMethod: payment,
-      });
-      setStatus('success');
-      clearCart();
+      const res = await createReservation(cartItems.map((item) => ({ id: item.id, quantity: item.quantity })));
+      setReservation(res);
+      setStep(1);
     } catch (err) {
-      setStatus('error');
-      const message =
-        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-        'Something went wrong while placing your order. Please try again.';
-      setErrorMessage(message);
+      setReservationError(getApiErrorMessage(err, 'Unable to reserve your items. Please try again.'));
+    } finally {
+      setReservationLoading(false);
     }
   };
 
-  if (status === 'success') {
+  const handleCheckout = async () => {
+    if (!reservation) return;
+
+    setCheckoutLoading(true);
+    setCheckoutError(null);
+
+    try {
+      const result = await checkout({
+        reservationId: reservation._id,
+        shippingInfo,
+        paymentMethod,
+        deliveryMethod,
+      });
+      setCheckoutResult(result);
+      clearCart();
+      setStep(4);
+    } catch (err) {
+      const status = (err as { response?: { status?: number } })?.response?.status;
+      if (status === 410) {
+        setExpired(true);
+      } else {
+        setCheckoutError(getApiErrorMessage(err, 'Something went wrong while placing your order. Please try again.'));
+      }
+    } finally {
+      setCheckoutLoading(false);
+    }
+  };
+
+  const itemsPrice = reservation
+    ? reservation.items.reduce((sum, item) => sum + item.price * item.quantity, 0)
+    : totalPrice;
+
+  const shippingPrice = getShippingPrice(deliveryMethod, itemsPrice);
+
+  if (expired) {
     return (
       <S.Page>
         <S.Container>
-          <S.FormCard>
-            <S.Empty>
-              <Alert title="Order placed!" color="green">
-                Thank you for your order. We&apos;ve received it and will process it shortly.
-              </Alert>
-              <Button mt="md" component={Link} to="/books">
-                Continue Shopping
-              </Button>
-            </S.Empty>
-          </S.FormCard>
+          <StepS.ExpiredCard initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+            <Alert title="Reservation expired" color="red">
+              Your item reservation has expired and the stock has been released. Please return to your cart and
+              try again.
+            </Alert>
+            <Button onClick={() => navigate('/cart')}>Return to Cart</Button>
+          </StepS.ExpiredCard>
         </S.Container>
       </S.Page>
     );
   }
 
-  if (cartItems.length === 0) {
+  if (cartItems.length === 0 && step === 0) {
     return (
       <S.Page>
         <S.Container>
@@ -89,10 +139,6 @@ function Checkout() {
               <div>Subtotal</div>
               <div>${totalPrice.toFixed(2)}</div>
             </S.SummaryRow>
-            <S.SummaryRow>
-              <div>Estimated delivery</div>
-              <div>${shippingCost === 0 ? 'Free' : shippingCost.toFixed(2)}</div>
-            </S.SummaryRow>
             <Divider my="sm" />
             <Button fullWidth size="md" component={Link} to="/books">
               Browse Books
@@ -103,66 +149,84 @@ function Checkout() {
     );
   }
 
+  if (step === 4 && checkoutResult) {
+    return (
+      <S.Page>
+        <S.StepperWrap>
+          <Stepper active={step}>
+            {STEP_LABELS.map((label) => (
+              <Stepper.Step key={label} label={label} />
+            ))}
+          </Stepper>
+        </S.StepperWrap>
+
+        <S.Container>
+          <ConfirmationStep result={checkoutResult} />
+          <div />
+        </S.Container>
+      </S.Page>
+    );
+  }
+
   return (
     <S.Page>
+      <S.StepperWrap>
+        <Stepper active={step}>
+          {STEP_LABELS.map((label) => (
+            <Stepper.Step key={label} label={label} />
+          ))}
+        </Stepper>
+      </S.StepperWrap>
+
       <S.Container>
-        <S.FormCard as="form" id="checkout-form" onSubmit={handleSubmit} aria-labelledby="checkout-heading">
-          <h1 id="checkout-heading">Checkout</h1>
+        {step === 0 && <CartReviewStep onContinue={handleReserve} loading={reservationLoading} error={reservationError} />}
 
-          {status === 'error' && (
-            <Alert title="Order failed" color="red">
-              {errorMessage}
-            </Alert>
-          )}
+        {step === 1 && reservation && (
+          <ShippingStep
+            value={shippingInfo}
+            onChange={setShippingInfo}
+            onNext={() => setStep(2)}
+            expiresAt={reservation.expiresAt}
+            onExpire={handleExpire}
+          />
+        )}
 
-          <label htmlFor="fullName">Full name</label>
-          <TextInput id="fullName" placeholder="Full name" value={form.fullName} onChange={(e) => handleChange('fullName', e.currentTarget.value)} required aria-required />
+        {step === 2 && reservation && (
+          <DeliveryStep
+            value={deliveryMethod}
+            onChange={setDeliveryMethod}
+            itemsPrice={itemsPrice}
+            onBack={() => setStep(1)}
+            onNext={() => setStep(3)}
+            expiresAt={reservation.expiresAt}
+            onExpire={handleExpire}
+          />
+        )}
 
-          <label htmlFor="email">Email</label>
-          <TextInput id="email" placeholder="you@example.com" value={form.email} onChange={(e) => handleChange('email', e.currentTarget.value)} required aria-required type="email" />
-
-          <label htmlFor="address">Address</label>
-          <TextInput id="address" placeholder="Street address" value={form.address} onChange={(e) => handleChange('address', e.currentTarget.value)} required aria-required />
-
-          <S.FieldGrid>
-            <div>
-              <label htmlFor="city">City</label>
-              <TextInput id="city" placeholder="City" value={form.city} onChange={(e) => handleChange('city', e.currentTarget.value)} required aria-required />
-            </div>
-
-            <div>
-              <label htmlFor="postal">Postal Code</label>
-              <TextInput id="postal" placeholder="Postal code" value={form.postal} onChange={(e) => handleChange('postal', e.currentTarget.value)} required aria-required />
-            </div>
-          </S.FieldGrid>
-
-          <label htmlFor="country">Country</label>
-          <TextInput id="country" placeholder="Country" value={form.country} onChange={(e) => handleChange('country', e.currentTarget.value)} required aria-required />
-
-          <S.PaymentCard>
-            <h3>Payment method</h3>
-            <RadioGroup value={payment} onChange={setPayment} name="payment" aria-label="Payment method">
-              <Radio value="card" label="Credit / Debit card" />
-              <Radio value="paypal" label="PayPal (mock)" />
-              <Radio value="cod" label="Cash on delivery" />
-            </RadioGroup>
-          </S.PaymentCard>
-
-          <S.SubmitRow>
-            <Button type="submit" size="md" color="indigo" aria-label="Place order" loading={status === 'loading'} disabled={status === 'loading'}>
-              Place Order
-            </Button>
-          </S.SubmitRow>
-        </S.FormCard>
+        {step === 3 && reservation && (
+          <PaymentStep
+            value={paymentMethod}
+            onChange={setPaymentMethod}
+            onBack={() => setStep(2)}
+            onSubmit={handleCheckout}
+            loading={checkoutLoading}
+            error={checkoutError}
+            expiresAt={reservation.expiresAt}
+            onExpire={handleExpire}
+          />
+        )}
 
         <S.Summary aria-live="polite">
           <h2>Order Summary</h2>
           <Divider my="sm" />
+
           <div>
-            {cartItems.map((it) => (
-              <S.SummaryRow key={it.id}>
-                <div>{it.title}</div>
-                <div>${(it.price * it.quantity).toFixed(2)}</div>
+            {(reservation ? reservation.items : cartItems).map((item) => (
+              <S.SummaryRow key={'book' in item ? item.book : item.id}>
+                <div>
+                  {item.title} &times; {item.quantity}
+                </div>
+                <div>${(item.price * item.quantity).toFixed(2)}</div>
               </S.SummaryRow>
             ))}
           </div>
@@ -171,18 +235,23 @@ function Checkout() {
 
           <S.SummaryRow>
             <div>Subtotal</div>
-            <div>${totalPrice.toFixed(2)}</div>
+            <div>${itemsPrice.toFixed(2)}</div>
           </S.SummaryRow>
           <S.SummaryRow>
-            <div>Estimated delivery</div>
-            <div>${shippingCost === 0 ? 'Free' : shippingCost.toFixed(2)}</div>
+            <div>Shipping</div>
+            <div>{shippingPrice === 0 ? 'Free' : `$${shippingPrice.toFixed(2)}`}</div>
           </S.SummaryRow>
 
           <Divider my="sm" />
 
-          <Button fullWidth size="md" color="indigo" type="submit" form="checkout-form" aria-disabled={!validate() || status === 'loading'} disabled={!validate() || status === 'loading'} loading={status === 'loading'} aria-label="Place order">
-            Place Order
-          </Button>
+          <S.SummaryRow>
+            <div>
+              <strong>Total</strong>
+            </div>
+            <div>
+              <strong>${(itemsPrice + shippingPrice).toFixed(2)}</strong>
+            </div>
+          </S.SummaryRow>
         </S.Summary>
       </S.Container>
     </S.Page>

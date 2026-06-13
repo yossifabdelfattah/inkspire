@@ -28,6 +28,8 @@ export interface Order {
   totalPrice: number;
   itemsPrice: number;
   shippingPrice: number;
+  deliveryMethod?: 'standard' | 'express';
+  deliveryEstimate?: string;
   status: string;
   createdAt: string;
 }

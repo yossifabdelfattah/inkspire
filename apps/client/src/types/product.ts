@@ -13,6 +13,7 @@ export interface Book {
   rating: number;
   ratingCount: number;
   inStock: boolean;
+  availableStock: number;
 }
 
 export type ProductDetailsRouteParamKey = 'id';

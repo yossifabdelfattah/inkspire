@@ -40,6 +40,15 @@ const orderSchema = new mongoose.Schema(
       enum: ['card', 'paypal', 'cod'],
       default: 'card'
     },
+    deliveryMethod: {
+      type: String,
+      enum: ['standard', 'express'],
+      default: 'standard'
+    },
+    deliveryEstimate: {
+      type: String,
+      default: ''
+    },
     itemsPrice: {
       type: Number,
       required: true
