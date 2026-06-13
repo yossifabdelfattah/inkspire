@@ -4,18 +4,36 @@ const InventoryReservation = require('../models/InventoryReservation');
 const CLEANUP_INTERVAL_MS = 30 * 1000; // 30 seconds
 
 // Releases a reservation's held stock without ever driving reservedStock
-// negative — if reservedStock is already lower than the held quantity
-// (shouldn't normally happen), the decrement is clamped to what's left.
+// negative. Only ever subtracts `quantity` (clamped at 0) — never resets the
+// whole counter, so other active reservations' holds on the same book are
+// left untouched. If reservedStock was already lower than `quantity`
+// (shouldn't normally happen), the shortfall is logged as a warning.
 const releaseReservedStock = async (bookId, quantity, session) => {
+  const before = await Book.findById(bookId, 'reservedStock', { session });
+
   const updated = await Book.findOneAndUpdate(
-    { _id: bookId, reservedStock: { $gte: quantity } },
-    { $inc: { reservedStock: -quantity } },
+    { _id: bookId },
+    [
+      {
+        $set: {
+          reservedStock: {
+            $max: [0, { $subtract: [{ $ifNull: ['$reservedStock', 0] }, quantity] }],
+          },
+        },
+      },
+    ],
     { session, new: true }
   );
 
   if (!updated) {
-    // Clamp to zero instead of leaving a stale positive reservedStock.
-    await Book.updateOne({ _id: bookId, reservedStock: { $gt: 0 } }, { $set: { reservedStock: 0 } }, { session });
+    console.warn(`[ReservationCleanup] releaseReservedStock: book ${bookId} not found`);
+    return;
+  }
+
+  if (before && before.reservedStock < quantity) {
+    console.warn(
+      `[ReservationCleanup] releaseReservedStock: book ${bookId} reservedStock (${before.reservedStock}) was less than release quantity (${quantity}); clamped to 0.`
+    );
   }
 };
 

@@ -84,11 +84,7 @@ const checkout = async (req, res, next) => {
     const shippingPrice = getShippingPrice(deliveryMethod, itemsPrice);
     const totalPrice = itemsPrice + shippingPrice;
 
-    // Simulate the payment step — never integrates a real provider and never
-    // persists card details.
-    const payment = simulateMockPayment();
-
-    const order = await withOptionalTransaction(async (session) => {
+    const { order, payment } = await withOptionalTransaction(async (session) => {
       // Re-check the reservation's status inside the transaction so a
       // concurrent checkout or cleanup pass can't complete/expire it out
       // from under us between the check above and now.
@@ -101,6 +97,12 @@ const checkout = async (req, res, next) => {
       if (!claim) {
         throw Object.assign(new Error('Reservation is no longer active'), { statusCode: 409 });
       }
+
+      // Simulate the payment step — never integrates a real provider and
+      // never persists card details. Done inside the transaction so a
+      // failure further down (e.g. insufficient stock) rolls the "charge"
+      // back along with everything else.
+      const payment = simulateMockPayment();
 
       // Permanently commit the stock deduction and release the reservation
       // hold, never letting either counter drop below zero.
@@ -148,7 +150,7 @@ const checkout = async (req, res, next) => {
         { session }
       );
 
-      return createdOrder;
+      return { order: createdOrder, payment };
     });
 
     res.status(201).json({ order, payment });
