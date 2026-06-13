@@ -7,11 +7,19 @@ const {
   createBook,
   updateBook,
   deleteBook,
+  getRecommendations,
+  getRelatedBooks,
 } = require("../controllers/bookController");
-const { verifyFirebaseToken, requireAdmin } = require("../middleware/firebaseAuthMiddleware");
+const { verifyFirebaseToken, requireAdmin, attachUserIfPresent } = require("../middleware/firebaseAuthMiddleware");
 
 // GET all books
 router.get("/", getBooks);
+
+// GET personalized recommendations (works for both logged-in and anonymous users)
+router.get("/recommendations", attachUserIfPresent, getRecommendations);
+
+// GET books related to a given book (same category)
+router.get("/:id/related", getRelatedBooks);
 
 // GET single book
 router.get("/:id", getBookById);

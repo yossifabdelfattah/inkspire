@@ -6,8 +6,9 @@ import type { ProductDetailsRouteParamKey } from '../types';
 import type { Book } from '../types/product';
 import * as S from './ProductDetails.styled';
 import { useCart } from '../context/useCart';
-import { getBookById } from '../services/bookService';
+import { getBookById, getRelatedBooks } from '../services/bookService';
 import ReviewsSection from '../components/books/ReviewsSection';
+import FeaturedBooks from '../components/books/FeaturedBooks';
 
 function ProductDetails() {
   const { id } = useParams<ProductDetailsRouteParamKey>();
@@ -18,6 +19,8 @@ function ProductDetails() {
   const [book, setBook] = useState<Book | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [relatedBooks, setRelatedBooks] = useState<Book[]>([]);
+  const [relatedLoading, setRelatedLoading] = useState(true);
 
   useEffect(() => {
     let mounted = true;
@@ -26,7 +29,7 @@ function ProductDetails() {
       try {
         const b = await getBookById(bookId);
         if (!mounted) return;
-        
+
         if (b === null) {
           setError('Book not found');
         } else {
@@ -39,6 +42,22 @@ function ProductDetails() {
         if (mounted) setLoading(false);
       }
     })();
+
+    return () => {
+      mounted = false;
+    };
+  }, [bookId]);
+
+  useEffect(() => {
+    let mounted = true;
+
+    getRelatedBooks(bookId)
+      .then((data) => {
+        if (mounted) setRelatedBooks(data);
+      })
+      .finally(() => {
+        if (mounted) setRelatedLoading(false);
+      });
 
     return () => {
       mounted = false;
@@ -131,8 +150,14 @@ function ProductDetails() {
           </S.Section>
 
           <S.Section>
-            <S.SectionTitle>Related Books</S.SectionTitle>
-            <S.Placeholder role="region" aria-label="Related books placeholder">Related books carousel or recommendations will appear here.</S.Placeholder>
+            <FeaturedBooks
+              books={relatedBooks}
+              loading={relatedLoading}
+              headingId={`related-books-heading-${book.id}`}
+              title="Related Books"
+              subtitle="More books you might enjoy."
+              emptyMessage="No related books found."
+            />
           </S.Section>
         </S.Meta>
       </S.Layout>

@@ -71,4 +71,30 @@ export async function getBookById(id: string | number): Promise<Book | null> {
   return null;
 }
 
-export default { getBooks, getBookById };
+export async function getRecommendations(limit = 8): Promise<Book[]> {
+  try {
+    const res = await api.get(`/books/recommendations?limit=${limit}`);
+    if (Array.isArray(res?.data)) {
+      return res.data.map((it: BookApiItem, i: number) => mapToBook(it, i));
+    }
+  } catch {
+    // No recommendations available — caller should hide the section
+  }
+
+  return [];
+}
+
+export async function getRelatedBooks(id: string | number, limit = 6): Promise<Book[]> {
+  try {
+    const res = await api.get(`/books/${id}/related?limit=${limit}`);
+    if (Array.isArray(res?.data)) {
+      return res.data.map((it: BookApiItem, i: number) => mapToBook(it, i));
+    }
+  } catch {
+    // No related books available — caller should hide the section
+  }
+
+  return [];
+}
+
+export default { getBooks, getBookById, getRecommendations, getRelatedBooks };

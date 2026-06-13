@@ -1,5 +1,7 @@
+const mongoose = require("mongoose");
 const Book = require("../models/Book");
 const SearchLog = require("../models/SearchLog");
+const Order = require("../models/Order");
 
 // GET all books with search, filter, and sort
 const getBooks = async (req, res) => {
@@ -55,6 +57,100 @@ const getBooks = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       message: 'Failed to fetch books',
+      error: error.message,
+    });
+  }
+};
+
+// GET /api/books/recommendations
+// Personalized "recommended for you" list:
+//  - Logged-in users with order history: top-rated books from categories they've
+//    previously purchased, excluding books they already own.
+//  - Anonymous users / users with no orders: top-rated books overall.
+const getRecommendations = async (req, res) => {
+  try {
+    const limit = Math.min(parseInt(req.query.limit) || 8, 20);
+    const mongoId = req.user?.mongoId;
+
+    let purchasedCategories = [];
+    let purchasedBookIds = [];
+
+    if (mongoId) {
+      const orders = await Order.find({ user: mongoId }).select('orderItems.product');
+      purchasedBookIds = [
+        ...new Set(orders.flatMap((order) => order.orderItems.map((item) => String(item.product)))),
+      ];
+
+      if (purchasedBookIds.length > 0) {
+        const purchasedBooks = await Book.find({ _id: { $in: purchasedBookIds } }).select('category');
+        purchasedCategories = [...new Set(purchasedBooks.map((b) => b.category).filter(Boolean))];
+      }
+    }
+
+    let books = [];
+
+    if (purchasedCategories.length > 0) {
+      books = await Book.find({
+        category: { $in: purchasedCategories },
+        _id: { $nin: purchasedBookIds },
+      })
+        .sort({ ratingAverage: -1, ratingCount: -1 })
+        .limit(limit);
+    }
+
+    // Fallback (anonymous users, no order history, or not enough category matches)
+    if (books.length < limit) {
+      const excludeIds = [...purchasedBookIds, ...books.map((b) => String(b._id))];
+      const fallback = await Book.find({ _id: { $nin: excludeIds } })
+        .sort({ ratingAverage: -1, ratingCount: -1 })
+        .limit(limit - books.length);
+
+      books = [...books, ...fallback];
+    }
+
+    res.status(200).json(books);
+  } catch (error) {
+    res.status(500).json({
+      message: 'Failed to fetch recommendations',
+      error: error.message,
+    });
+  }
+};
+
+// GET /api/books/:id/related
+// Returns other books in the same category, falling back to top-rated books overall
+// if there aren't enough in the same category.
+const getRelatedBooks = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const limit = Math.min(parseInt(req.query.limit) || 6, 20);
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'Invalid book id' });
+    }
+
+    const book = await Book.findById(id).select('category');
+    if (!book) {
+      return res.status(404).json({ message: 'Book not found' });
+    }
+
+    let related = await Book.find({ _id: { $ne: id }, category: book.category })
+      .sort({ ratingAverage: -1, ratingCount: -1 })
+      .limit(limit);
+
+    if (related.length < limit) {
+      const excludeIds = [id, ...related.map((b) => String(b._id))];
+      const fallback = await Book.find({ _id: { $nin: excludeIds } })
+        .sort({ ratingAverage: -1, ratingCount: -1 })
+        .limit(limit - related.length);
+
+      related = [...related, ...fallback];
+    }
+
+    res.status(200).json(related);
+  } catch (error) {
+    res.status(500).json({
+      message: 'Failed to fetch related books',
       error: error.message,
     });
   }
@@ -142,4 +238,12 @@ const deleteBook = async (req, res) => {
   }
 };
 
-module.exports = { getBooks, getBookById, createBook, updateBook, deleteBook };
+module.exports = {
+  getBooks,
+  getBookById,
+  createBook,
+  updateBook,
+  deleteBook,
+  getRecommendations,
+  getRelatedBooks,
+};

@@ -9,9 +9,21 @@ interface FeaturedBooksProps {
   books?: Book[];
   loading?: boolean;
   onAddToCart?: (book: Book) => void;
+  headingId?: string;
+  title?: string;
+  subtitle?: string;
+  emptyMessage?: string;
 }
 
-function FeaturedBooks({ books: propsBooks, loading: propsLoading, onAddToCart }: FeaturedBooksProps = {}) {
+function FeaturedBooks({
+  books: propsBooks,
+  loading: propsLoading,
+  onAddToCart,
+  headingId = 'featured-books-heading',
+  title = 'Featured Books',
+  subtitle = 'Curated picks selected for Inkspire readers.',
+  emptyMessage = 'No featured books available.',
+}: FeaturedBooksProps = {}) {
   // For demo, simulate loading and use centralized mock data
   const [mockData, setMockData] = useState<Book[]>([]);
   const [isLoading, setIsLoading] = useState(!propsBooks);
@@ -30,10 +42,10 @@ function FeaturedBooks({ books: propsBooks, loading: propsLoading, onAddToCart }
   }, [propsBooks, mockData.length]);
 
   return (
-    <S.Section aria-labelledby="featured-books-heading">
+    <S.Section aria-labelledby={headingId}>
       <S.Header>
-        <S.Title id="featured-books-heading">Featured Books</S.Title>
-        <S.Subtitle>Curated picks selected for Inkspire readers.</S.Subtitle>
+        <S.Title id={headingId}>{title}</S.Title>
+        <S.Subtitle>{subtitle}</S.Subtitle>
       </S.Header>
 
       {displayLoading ? (
@@ -43,7 +55,7 @@ function FeaturedBooks({ books: propsBooks, loading: propsLoading, onAddToCart }
           ))}
         </S.Grid>
       ) : displayBooks.length === 0 ? (
-        <S.Empty>No featured books available.</S.Empty>
+        <S.Empty>{emptyMessage}</S.Empty>
       ) : (
         <S.Grid>
           {displayBooks.map((book) => (

@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import * as S from './Home.styled';
 import heroImg from '../assets/hero.png';
 import FeaturedBooks from '../components/books/FeaturedBooks';
+import RecommendedBooks from '../components/books/RecommendedBooks';
 import Categories from '../components/home/Categories';
 import WhyChoose from '../components/home/WhyChoose';
 import CTABanner from '../components/home/CTABanner';
@@ -56,6 +57,7 @@ function Home() {
         </S.HeroVisual>
       </S.HeroSection>
       <FeaturedBooks />
+      <RecommendedBooks />
       <Categories />
       <WhyChoose />
       <CTABanner />
