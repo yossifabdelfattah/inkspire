@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const Book = require("../models/Book");
 const SearchLog = require("../models/SearchLog");
 const Order = require("../models/Order");
+const Inventory = require("../models/Inventory");
 
 // GET all books with search, filter, and sort
 const getBooks = async (req, res) => {
@@ -156,6 +157,41 @@ const getRelatedBooks = async (req, res) => {
   }
 };
 
+// GET /api/books/:id/stores
+// Returns the physical stores that currently have this book in stock.
+const getBookStores = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'Invalid book id' });
+    }
+
+    const inventory = await Inventory.find({ book: id, stock: { $gt: 0 } })
+      .populate('store')
+      .sort({ stock: -1 });
+
+    const stores = inventory
+      .filter((item) => item.store)
+      .map((item) => ({
+        _id: item.store._id,
+        name: item.store.name,
+        address: item.store.address,
+        city: item.store.city,
+        latitude: item.store.latitude,
+        longitude: item.store.longitude,
+        stock: item.stock,
+      }));
+
+    res.status(200).json(stores);
+  } catch (error) {
+    res.status(500).json({
+      message: 'Failed to fetch store availability',
+      error: error.message,
+    });
+  }
+};
+
 // GET single book by ID
 const getBookById = async (req, res) => {
   try {
@@ -246,4 +282,5 @@ module.exports = {
   deleteBook,
   getRecommendations,
   getRelatedBooks,
+  getBookStores,
 };

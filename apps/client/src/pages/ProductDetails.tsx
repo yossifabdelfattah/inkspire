@@ -9,6 +9,7 @@ import { useCart } from '../context/useCart';
 import { getBookById, getRelatedBooks } from '../services/bookService';
 import ReviewsSection from '../components/books/ReviewsSection';
 import FeaturedBooks from '../components/books/FeaturedBooks';
+import StoreAvailabilityMap from '../components/books/StoreAvailabilityMap';
 
 function ProductDetails() {
   const { id } = useParams<ProductDetailsRouteParamKey>();
@@ -146,7 +147,7 @@ function ProductDetails() {
 
           <S.Section>
             <S.SectionTitle>Store Availability</S.SectionTitle>
-            <S.Placeholder role="region" aria-label="Store availability placeholder">Map and store availability will be integrated here (Leaflet map planned).</S.Placeholder>
+            <StoreAvailabilityMap bookId={book.id} />
           </S.Section>
 
           <S.Section>
