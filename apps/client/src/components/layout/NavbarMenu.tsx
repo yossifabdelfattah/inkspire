@@ -1,5 +1,6 @@
 import { AnimatePresence } from 'framer-motion';
 import type { FC } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/useCart';
 import { useAuth } from '../../context/useAuth';
 import * as S from './NavbarMenu.styled';
@@ -11,7 +12,14 @@ interface NavbarMenuProps {
 
 const NavbarMenu: FC<NavbarMenuProps> = ({ open, onClose }) => {
   const { totalItems } = useCart();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logout();
+    onClose();
+    navigate('/');
+  };
 
   return (
     <AnimatePresence>
@@ -39,6 +47,7 @@ const NavbarMenu: FC<NavbarMenuProps> = ({ open, onClose }) => {
               <>
                 <S.MenuLink to="/profile" onClick={onClose}>Profile</S.MenuLink>
                 {user.role === 'admin' && <S.MenuLink to="/admin" onClick={onClose}>Admin</S.MenuLink>}
+                <S.MenuButton type="button" onClick={handleLogout} aria-label="Log out">Logout</S.MenuButton>
               </>
             ) : (
               <>

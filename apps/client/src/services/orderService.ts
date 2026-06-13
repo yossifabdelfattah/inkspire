@@ -15,8 +15,16 @@ export interface CreateOrderPayload {
   paymentMethod: string;
 }
 
+export interface OrderItem {
+  product: string;
+  title: string;
+  quantity: number;
+  price: number;
+}
+
 export interface Order {
   _id: string;
+  orderItems: OrderItem[];
   totalPrice: number;
   itemsPrice: number;
   shippingPrice: number;
@@ -29,4 +37,9 @@ export async function createOrder(payload: CreateOrderPayload): Promise<Order> {
   return res.data;
 }
 
-export default { createOrder };
+export async function getMyOrders(): Promise<Order[]> {
+  const res = await api.get('/orders');
+  return res.data;
+}
+
+export default { createOrder, getMyOrders };

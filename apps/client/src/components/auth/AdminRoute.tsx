@@ -8,10 +8,10 @@ interface AdminRouteProps {
 }
 
 function AdminRoute({ children }: AdminRouteProps) {
-  const { user, loading } = useAuth();
+  const { user, loading, roleLoading } = useAuth();
   const location = useLocation();
 
-  if (loading) {
+  if (loading || (user && roleLoading)) {
     return (
       <Center mih="100vh" role="status" aria-live="polite" aria-label="Loading authentication state">
         <Loader />

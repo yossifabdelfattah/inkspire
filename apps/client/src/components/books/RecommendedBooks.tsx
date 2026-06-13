@@ -3,7 +3,11 @@ import type { Book } from '../../types/product';
 import FeaturedBooks from './FeaturedBooks';
 import { getRecommendations } from '../../services/bookService';
 
-function RecommendedBooks() {
+interface RecommendedBooksProps {
+  onAddToCart?: (book: Book) => void;
+}
+
+function RecommendedBooks({ onAddToCart }: RecommendedBooksProps = {}) {
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -29,6 +33,7 @@ function RecommendedBooks() {
     <FeaturedBooks
       books={books}
       loading={loading}
+      onAddToCart={onAddToCart}
       headingId="recommended-books-heading"
       title="Recommended for You"
       subtitle="Picks based on your reading history."

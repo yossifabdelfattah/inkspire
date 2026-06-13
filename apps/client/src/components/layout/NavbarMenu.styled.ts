@@ -38,6 +38,24 @@ export const MenuLink = styled(Link)`
   }
 `;
 
+export const MenuButton = styled.button`
+  font-size: ${({ theme }) => theme.font.size.lg};
+  color: ${({ theme }) => theme.colors.primary};
+  font-weight: ${({ theme }) => theme.font.weight.medium};
+  margin-bottom: ${({ theme }) => theme.spacing.sm};
+  transition: color 0.2s;
+  background: none;
+  border: none;
+  text-align: left;
+  padding: 0;
+  cursor: pointer;
+  font-family: inherit;
+
+  &:hover {
+    color: ${({ theme }) => theme.colors.error};
+  }
+`;
+
 export const CloseButton = styled.button`
   align-self: flex-end;
   background: none;

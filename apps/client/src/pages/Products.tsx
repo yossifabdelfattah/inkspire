@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { TextInput, Select, Skeleton } from '@mantine/core';
 import { motion } from 'framer-motion';
 import BookCard from '../components/books/BookCard';
@@ -12,14 +13,33 @@ import { getBooks } from '../services/bookService';
 const CATEGORIES = ['All', 'Fiction', 'Programming', 'Self-help', 'Science Fiction', 'Mystery', 'History', 'Fantasy', 'Biography'];
 
 function Products() {
+  const [searchParams, setSearchParams] = useSearchParams();
+
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const [query, setQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
-  const [category, setCategory] = useState('All');
   const [sort, setSort] = useState('relevance');
+
+  // Derive the active category directly from the URL so that navigating here
+  // from "Browse by Category" (or sharing a link) applies the right filter.
+  const categoryFromUrl = searchParams.get('category');
+  const category = categoryFromUrl && CATEGORIES.includes(categoryFromUrl) ? categoryFromUrl : 'All';
+
+  const handleCategoryChange = (value: string | null) => {
+    const next = value ?? 'All';
+    setSearchParams((prev) => {
+      const params = new URLSearchParams(prev);
+      if (next === 'All') {
+        params.delete('category');
+      } else {
+        params.set('category', next);
+      }
+      return params;
+    });
+  };
 
   // Debounce search input
   useEffect(() => {
@@ -81,7 +101,7 @@ function Products() {
           <Select
             data={CATEGORIES.map((c) => ({ value: c, label: c }))}
             value={category}
-            onChange={(v) => setCategory(v ?? 'All')}
+            onChange={handleCategoryChange}
             aria-label="Filter by category"
           />
 

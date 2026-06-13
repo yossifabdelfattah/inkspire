@@ -8,6 +8,8 @@ function Register() {
   const navigate = useNavigate();
   const location = useLocation();
   const { register, signInWithGoogle, loading, user } = useAuth();
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
@@ -18,7 +20,7 @@ function Register() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    if (!email || !password) {
+    if (!firstName.trim() || !lastName.trim() || !email || !password) {
       setError('Please complete all required fields.');
       return;
     }
@@ -27,7 +29,8 @@ function Register() {
       return;
     }
     try {
-      await register(email, password);
+      const name = `${firstName.trim()} ${lastName.trim()}`.trim();
+      await register(email, password, name);
       void navigate(redirectTo, { replace: true });
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Registration failed.');
@@ -66,6 +69,32 @@ function Register() {
         )}
 
         <form onSubmit={(e) => { void handleSubmit(e); }} aria-describedby={error ? 'register-error' : undefined}>
+          <S.NameRow>
+            <TextInput
+              id="firstName"
+              name="firstName"
+              type="text"
+              label="First Name"
+              placeholder="Jane"
+              value={firstName}
+              onChange={(e) => setFirstName(e.currentTarget.value)}
+              required
+              aria-required
+            />
+
+            <TextInput
+              id="lastName"
+              name="lastName"
+              type="text"
+              label="Last Name"
+              placeholder="Doe"
+              value={lastName}
+              onChange={(e) => setLastName(e.currentTarget.value)}
+              required
+              aria-required
+            />
+          </S.NameRow>
+
           <TextInput
             id="email"
             name="email"
@@ -76,6 +105,7 @@ function Register() {
             onChange={(e) => setEmail(e.currentTarget.value)}
             required
             aria-required
+            mt="sm"
           />
 
           <PasswordInput

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/useCart';
 import { useAuth } from '../../context/useAuth';
 import NavbarMenu from './NavbarMenu';
@@ -6,8 +7,14 @@ import * as S from './Navbar.styled';
 
 function Navbar() {
   const { totalItems } = useCart();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/');
+  };
 
   return (
     <>
@@ -28,6 +35,7 @@ function Navbar() {
             <>
               <S.NavLink to="/profile">Profile</S.NavLink>
               {user.role === 'admin' && <S.NavLink to="/admin">Admin</S.NavLink>}
+              <S.NavButton type="button" onClick={handleLogout} aria-label="Log out">Logout</S.NavButton>
             </>
           ) : (
             <>

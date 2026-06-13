@@ -10,7 +10,7 @@ import {
   signInWithGoogle,
   subscribeToAuthState,
 } from '../services/authService';
-import { getMyProfile } from '../services/userService';
+import { getMyProfile, updateMyProfile } from '../services/userService';
 import type { UserProfile } from '../types/auth';
 
 interface AuthProviderProps {
@@ -20,6 +20,7 @@ interface AuthProviderProps {
 export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [roleLoading, setRoleLoading] = useState(true);
 
   useEffect(() => {
     const unsubscribe = subscribeToAuthState((currentUser) => {
@@ -27,13 +28,19 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
       setLoading(false);
 
       if (currentUser) {
+        setRoleLoading(true);
         getMyProfile()
           .then((profile) => {
             setUser((prev) => (prev ? { ...prev, role: profile.role } : prev));
           })
           .catch(() => {
             // Role stays undefined if the backend profile can't be fetched
+          })
+          .finally(() => {
+            setRoleLoading(false);
           });
+      } else {
+        setRoleLoading(false);
       }
     });
 
@@ -49,10 +56,19 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
     }
   }, []);
 
-  const register = useCallback(async (email: string, password: string) => {
+  const register = useCallback(async (email: string, password: string, name?: string) => {
     setLoading(true);
     try {
-      await registerWithEmailPassword(email, password);
+      await registerWithEmailPassword(email, password, name);
+
+      if (name) {
+        try {
+          await updateMyProfile({ name });
+        } catch {
+          // The Mongo profile will still be created with a fallback name on
+          // the next authenticated request; non-fatal if this sync fails.
+        }
+      }
     } finally {
       setLoading(false);
     }
@@ -76,9 +92,14 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
     }
   }, []);
 
+  const updateProfile = useCallback(async (name: string) => {
+    const profile = await updateMyProfile({ name });
+    setUser((prev) => (prev ? { ...prev, name: profile.name } : prev));
+  }, []);
+
   const value = useMemo(
-    () => ({ user, loading, login, register, logout, signInWithGoogle: googleSignIn }),
-    [user, loading, login, register, logout, googleSignIn]
+    () => ({ user, loading, roleLoading, login, register, logout, signInWithGoogle: googleSignIn, updateProfile }),
+    [user, loading, roleLoading, login, register, logout, googleSignIn, updateProfile]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

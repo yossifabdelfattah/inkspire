@@ -11,3 +11,8 @@ export async function getMyProfile(): Promise<MyProfile> {
   const res = await api.get('/users/me');
   return res.data;
 }
+
+export async function updateMyProfile(data: { name: string }): Promise<MyProfile> {
+  const res = await api.patch('/users/me', data);
+  return res.data;
+}

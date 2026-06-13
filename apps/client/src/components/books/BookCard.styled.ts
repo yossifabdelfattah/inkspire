@@ -1,4 +1,17 @@
 import styled from 'styled-components';
+import { Link } from 'react-router-dom';
+
+export const CoverLink = styled(Link)`
+  display: block;
+`;
+
+export const TitleLink = styled(Link)`
+  text-decoration: none;
+
+  &:hover h3 {
+    text-decoration: underline;
+  }
+`;
 
 export const Card = styled.article`
   background: ${({ theme }) => theme.colors.surface};

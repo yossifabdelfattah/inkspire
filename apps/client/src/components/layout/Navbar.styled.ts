@@ -62,6 +62,27 @@ export const NavLink = styled(Link)`
   }
 `;
 
+export const NavButton = styled.button`
+  font-size: ${({ theme }) => theme.font.size.md};
+  color: ${({ theme }) => theme.colors.text};
+  font-weight: ${({ theme }) => theme.font.weight.medium};
+  padding: 0.25em 0.5em;
+  border-radius: ${({ theme }) => theme.radius.sm};
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+  position: relative;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+
+  &:hover,
+  &:focus {
+    background: ${({ theme }) => theme.colors.muted};
+    color: ${({ theme }) => theme.colors.error};
+    outline: none;
+  }
+`;
+
 export const Hamburger = styled.button`
   display: none;
   background: none;

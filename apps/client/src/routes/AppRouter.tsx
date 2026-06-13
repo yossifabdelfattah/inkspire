@@ -4,6 +4,7 @@ import Checkout from '../pages/Checkout';
 import Home from '../pages/Home';
 import Login from '../pages/Login';
 import NotFound from '../pages/NotFound';
+import Profile from '../pages/Profile';
 import ProductDetails from '../pages/ProductDetails';
 import Products from '../pages/Products';
 import Register from '../pages/Register';
@@ -28,6 +29,7 @@ function AppRouter() {
       <Route path="/products/:id" element={<Navigate to="/books" replace />} />
       <Route path="/cart" element={<Cart />} />
       <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
+      <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
       <Route path="/admin" element={<AdminRoute><AdminOverview /></AdminRoute>} />
       <Route path="/admin/books" element={<AdminRoute><AdminBooks /></AdminRoute>} />
       <Route path="/admin/requests" element={<AdminRoute><AdminRequests /></AdminRoute>} />

@@ -5,6 +5,7 @@ import {
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
+  updateProfile,
   type User,
 } from 'firebase/auth';
 import { firebaseAuth } from '../firebase/firebase';
@@ -23,9 +24,14 @@ export async function loginWithEmailPassword(email: string, password: string): P
   return toUserProfile(credential.user);
 }
 
-export async function registerWithEmailPassword(email: string, password: string): Promise<UserProfile> {
+export async function registerWithEmailPassword(email: string, password: string, name?: string): Promise<UserProfile> {
   const credential = await createUserWithEmailAndPassword(firebaseAuth, email, password);
-  return toUserProfile(credential.user);
+
+  if (name) {
+    await updateProfile(credential.user, { displayName: name });
+  }
+
+  return { ...toUserProfile(credential.user), name: name ?? toUserProfile(credential.user).name };
 }
 
 export async function signInWithGoogle(): Promise<UserProfile> {

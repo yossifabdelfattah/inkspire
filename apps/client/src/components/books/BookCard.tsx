@@ -10,14 +10,18 @@ interface BookCardProps {
 function BookCard({ book, onAddToCart }: BookCardProps) {
   return (
     <S.Card role="article" aria-labelledby={`book-title-${book.id}`}>
-      <S.CoverWrap>
-        <S.Cover src={book.cover} alt={book.title} loading="lazy" />
-      </S.CoverWrap>
+      <S.CoverLink to={`/books/${book.id}`} aria-label={`View details for ${book.title}`}>
+        <S.CoverWrap>
+          <S.Cover src={book.cover} alt={book.title} loading="lazy" />
+        </S.CoverWrap>
+      </S.CoverLink>
 
       <S.Content>
-        <S.Title id={`book-title-${book.id}`} title={book.title}>
-          {book.title}
-        </S.Title>
+        <S.TitleLink to={`/books/${book.id}`}>
+          <S.Title id={`book-title-${book.id}`} title={book.title}>
+            {book.title}
+          </S.Title>
+        </S.TitleLink>
         <S.Author>{book.author}</S.Author>
 
         <S.MetaRow>

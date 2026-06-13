@@ -38,6 +38,19 @@ export const Subtitle = styled.p`
   margin: 0;
 `;
 
+export const NameRow = styled.div`
+  display: flex;
+  gap: 0.75rem;
+
+  > div {
+    flex: 1 1 50%;
+  }
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}px) {
+    flex-direction: column;
+  }
+`;
+
 export const Footer = styled.footer`
   display: flex;
   justify-content: center;

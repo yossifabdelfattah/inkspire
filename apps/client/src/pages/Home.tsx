@@ -6,8 +6,11 @@ import RecommendedBooks from '../components/books/RecommendedBooks';
 import Categories from '../components/home/Categories';
 import WhyChoose from '../components/home/WhyChoose';
 import CTABanner from '../components/home/CTABanner';
+import { useCart } from '../context/useCart';
 
 function Home() {
+  const { addToCart } = useCart();
+
   return (
     <>
       <S.HeroSection>
@@ -56,8 +59,8 @@ function Home() {
           />
         </S.HeroVisual>
       </S.HeroSection>
-      <FeaturedBooks />
-      <RecommendedBooks />
+      <FeaturedBooks onAddToCart={addToCart} />
+      <RecommendedBooks onAddToCart={addToCart} />
       <Categories />
       <WhyChoose />
       <CTABanner />

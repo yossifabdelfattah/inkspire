@@ -8,10 +8,10 @@ import sciFiImg from '../../assets/categories/sci-fi.svg';
 import childrenImg from '../../assets/categories/children.svg';
 
 const CATEGORIES = [
-  { id: 'fiction', title: 'Fiction', desc: 'Stories that spark imagination', img: fictionImg },
-  { id: 'non-fiction', title: 'Non-fiction', desc: 'Learn from the best', img: nonFictionImg },
-  { id: 'sci-fi', title: 'Sci‑fi', desc: 'Futuristic adventures', img: sciFiImg },
-  { id: 'children', title: 'Children', desc: 'Books for young readers', img: childrenImg },
+  { id: 'Fiction', title: 'Fiction', desc: 'Stories that spark imagination', img: fictionImg },
+  { id: 'Self-help', title: 'Self-help', desc: 'Learn from the best', img: nonFictionImg },
+  { id: 'Science Fiction', title: 'Sci‑fi', desc: 'Futuristic adventures', img: sciFiImg },
+  { id: 'Fantasy', title: 'Fantasy', desc: 'Magical worlds and epic quests', img: childrenImg },
 ];
 
 const cardVariants = {
