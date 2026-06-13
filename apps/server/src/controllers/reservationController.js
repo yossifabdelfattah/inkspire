@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const Book = require('../models/Book');
 const InventoryReservation = require('../models/InventoryReservation');
-const { releaseExpiredReservations } = require('../services/reservationCleanupService');
+const { expireReservationIfNeeded, releaseReservedStock } = require('../services/reservationCleanupService');
 
 // POST /api/reservations
 // Places a temporary hold on stock for the given cart items so that other
@@ -14,7 +14,7 @@ const createReservation = async (req, res, next) => {
       return res.status(400).json({ message: 'No items to reserve' });
     }
 
-    const books = [];
+    const requestedItems = [];
 
     for (const item of items) {
       if (!mongoose.Types.ObjectId.isValid(item.id)) {
@@ -26,33 +26,52 @@ const createReservation = async (req, res, next) => {
         return res.status(400).json({ message: `Invalid quantity for book ${item.id}` });
       }
 
-      const book = await Book.findById(item.id);
-      if (!book) {
-        return res.status(404).json({ message: `Book not found: ${item.id}` });
-      }
+      requestedItems.push({ id: item.id, quantity });
+    }
 
-      const available = book.stock - book.reservedStock;
-      if (available < quantity) {
+    // Hold stock one book at a time using an atomic conditional update so
+    // concurrent requests can never both succeed in reserving the same
+    // last-available copy. If any item can't be reserved, every hold
+    // already placed in this request is rolled back.
+    const reservedItems = [];
+
+    for (const { id, quantity } of requestedItems) {
+      const updatedBook = await Book.findOneAndUpdate(
+        {
+          _id: id,
+          $expr: { $gte: [{ $subtract: ['$stock', '$reservedStock'] }, quantity] },
+        },
+        { $inc: { reservedStock: quantity } },
+        { new: true }
+      );
+
+      if (!updatedBook) {
+        const book = await Book.findById(id);
+
+        await Promise.all(
+          reservedItems.map(({ book: heldBook, quantity: heldQuantity }) =>
+            releaseReservedStock(heldBook._id, heldQuantity)
+          )
+        );
+
+        if (!book) {
+          return res.status(404).json({ message: `Book not found: ${id}` });
+        }
+
+        const available = book.stock - book.reservedStock;
         return res.status(409).json({
           message: `Not enough stock for "${book.title}" (only ${available} available)`,
         });
       }
 
-      books.push({ book, quantity });
+      reservedItems.push({ book: updatedBook, quantity });
     }
-
-    // All items have enough available stock — place the holds.
-    await Promise.all(
-      books.map(({ book, quantity }) =>
-        Book.updateOne({ _id: book._id }, { $inc: { reservedStock: quantity } })
-      )
-    );
 
     const expiresAt = new Date(Date.now() + InventoryReservation.RESERVATION_DURATION_MS);
 
     const reservation = await InventoryReservation.create({
       userId: req.user?.mongoId ?? null,
-      items: books.map(({ book, quantity }) => ({
+      items: reservedItems.map(({ book, quantity }) => ({
         book: book._id,
         title: book.title,
         quantity,
@@ -78,16 +97,13 @@ const getReservation = async (req, res, next) => {
       return res.status(400).json({ message: 'Invalid reservation id' });
     }
 
-    let reservation = await InventoryReservation.findById(id);
+    const reservation = await InventoryReservation.findById(id);
 
     if (!reservation) {
       return res.status(404).json({ message: 'Reservation not found' });
     }
 
-    if (reservation.status === 'active' && reservation.expiresAt <= new Date()) {
-      await releaseExpiredReservations();
-      reservation = await InventoryReservation.findById(id);
-    }
+    await expireReservationIfNeeded(reservation);
 
     res.status(200).json(reservation);
   } catch (error) {

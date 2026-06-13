@@ -1,7 +1,7 @@
 import api from '../api/axios';
 import type { ShippingInfo, Order } from './orderService';
 
-export type DeliveryMethod = 'standard' | 'express';
+export type DeliveryMethod = 'standard' | 'express' | 'pickup';
 
 export interface MockPayment {
   status: string;

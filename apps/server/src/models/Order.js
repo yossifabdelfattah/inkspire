@@ -40,9 +40,18 @@ const orderSchema = new mongoose.Schema(
       enum: ['card', 'paypal', 'cod'],
       default: 'card'
     },
+    paymentStatus: {
+      type: String,
+      enum: ['pending', 'paid', 'failed'],
+      default: 'pending'
+    },
+    mockTransactionId: {
+      type: String,
+      default: ''
+    },
     deliveryMethod: {
       type: String,
-      enum: ['standard', 'express'],
+      enum: ['standard', 'express', 'pickup'],
       default: 'standard'
     },
     deliveryEstimate: {

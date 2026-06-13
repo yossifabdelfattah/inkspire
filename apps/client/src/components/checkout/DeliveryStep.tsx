@@ -43,6 +43,15 @@ function DeliveryStep({ value, onChange, itemsPrice, onBack, onNext, expiresAt, 
           </S.OptionTitle>
           <S.OptionDesc>Estimated delivery: 1-2 business days</S.OptionDesc>
         </S.OptionCard>
+
+        <S.OptionCard $selected={value === 'pickup'}>
+          <input type="radio" name="delivery" value="pickup" checked={value === 'pickup'} onChange={() => onChange('pickup')} style={{ display: 'none' }} />
+          <S.OptionTitle>
+            <span>Store Pickup</span>
+            <span>Free</span>
+          </S.OptionTitle>
+          <S.OptionDesc>Ready for pickup within 24 hours</S.OptionDesc>
+        </S.OptionCard>
       </S.OptionGrid>
 
       <S.Actions>

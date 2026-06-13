@@ -49,11 +49,9 @@ const inventoryReservationSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// MongoDB TTL index — automatically removes reservation documents once
-// expiresAt is reached. The reservation cleanup service is responsible for
-// releasing reservedStock and marking reservations as 'expired' before this
-// background sweep removes the document.
-inventoryReservationSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+// Reservations are never auto-deleted — expired reservations are kept for
+// audit/history and marked status: 'expired' by the cleanup service.
+inventoryReservationSchema.index({ status: 1, expiresAt: 1 });
 
 const InventoryReservation = mongoose.model('InventoryReservation', inventoryReservationSchema);
 
