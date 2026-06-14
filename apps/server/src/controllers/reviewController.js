@@ -2,20 +2,7 @@ const mongoose = require('mongoose');
 const Review = require('../models/Review');
 const Book = require('../models/Book');
 const { getIO } = require('../config/socket');
-
-const recalculateBookRating = async (bookId) => {
-  const stats = await Review.aggregate([
-    { $match: { book: new mongoose.Types.ObjectId(bookId) } },
-    { $group: { _id: '$book', average: { $avg: '$rating' }, count: { $sum: 1 } } },
-  ]);
-
-  const ratingAverage = stats.length > 0 ? Math.round(stats[0].average * 10) / 10 : 0;
-  const ratingCount = stats.length > 0 ? stats[0].count : 0;
-
-  await Book.findByIdAndUpdate(bookId, { ratingAverage, ratingCount });
-
-  return { ratingAverage, ratingCount };
-};
+const { recalculateBookRating } = require('../services/ratingService');
 
 // GET /api/books/:bookId/reviews
 const getBookReviews = async (req, res) => {

@@ -7,8 +7,6 @@ const books = [
     category: "Self-help",
     image: "https://covers.openlibrary.org/b/id/8418753-L.jpg",
     stock: 15,
-    ratingAverage: 4.8,
-    ratingCount: 245,
   },
   {
     title: "Clean Code",
@@ -18,8 +16,6 @@ const books = [
     category: "Programming",
     image: "https://covers.openlibrary.org/b/id/345991-L.jpg",
     stock: 10,
-    ratingAverage: 4.7,
-    ratingCount: 180,
   },
   {
     title: "The Midnight Library",
@@ -29,8 +25,6 @@ const books = [
     category: "Fiction",
     image: "https://covers.openlibrary.org/b/id/11153213-L.jpg",
     stock: 22,
-    ratingAverage: 4.5,
-    ratingCount: 328,
   },
   {
     title: "Project Hail Mary",
@@ -40,8 +34,6 @@ const books = [
     category: "Science Fiction",
     image: "https://covers.openlibrary.org/b/id/10958339-L.jpg",
     stock: 18,
-    ratingAverage: 4.8,
-    ratingCount: 412,
   },
   {
     title: "The Silent Patient",
@@ -51,8 +43,6 @@ const books = [
     category: "Mystery",
     image: "https://covers.openlibrary.org/b/id/10449159-L.jpg",
     stock: 20,
-    ratingAverage: 4.4,
-    ratingCount: 289,
   },
   {
     title: "Sapiens",
@@ -62,8 +52,6 @@ const books = [
     category: "History",
     image: "https://covers.openlibrary.org/b/id/8438109-L.jpg",
     stock: 25,
-    ratingAverage: 4.6,
-    ratingCount: 567,
   },
   {
     title: "The Name of the Wind",
@@ -73,8 +61,6 @@ const books = [
     category: "Fantasy",
     image: "https://covers.openlibrary.org/b/id/7718261-L.jpg",
     stock: 16,
-    ratingAverage: 4.7,
-    ratingCount: 456,
   },
   {
     title: "You Don't Know JS",
@@ -84,8 +70,6 @@ const books = [
     category: "Programming",
     image: "https://covers.openlibrary.org/b/id/8968832-L.jpg",
     stock: 12,
-    ratingAverage: 4.5,
-    ratingCount: 198,
   },
   {
     title: "Educated",
@@ -95,8 +79,6 @@ const books = [
     category: "Biography",
     image: "https://covers.openlibrary.org/b/id/10195143-L.jpg",
     stock: 28,
-    ratingAverage: 4.7,
-    ratingCount: 634,
   },
   {
     title: "The Seven Husbands of Evelyn Hugo",
@@ -106,8 +88,6 @@ const books = [
     category: "Fiction",
     image: "https://covers.openlibrary.org/b/id/9874521-L.jpg",
     stock: 24,
-    ratingAverage: 4.6,
-    ratingCount: 512,
   },
   {
     title: "The Hobbit",
@@ -117,8 +97,6 @@ const books = [
     category: "Fantasy",
     image: "https://covers.openlibrary.org/b/id/145871-L.jpg",
     stock: 30,
-    ratingAverage: 4.8,
-    ratingCount: 892,
   },
   {
     title: "Thinking, Fast and Slow",
@@ -128,8 +106,6 @@ const books = [
     category: "Self-help",
     image: "https://covers.openlibrary.org/b/id/8351829-L.jpg",
     stock: 14,
-    ratingAverage: 4.6,
-    ratingCount: 387,
   },
   {
     title: "The Girl with the Dragon Tattoo",
@@ -139,8 +115,6 @@ const books = [
     category: "Mystery",
     image: "https://covers.openlibrary.org/b/id/7952121-L.jpg",
     stock: 19,
-    ratingAverage: 4.5,
-    ratingCount: 421,
   },
   {
     title: "Dune",
@@ -150,8 +124,6 @@ const books = [
     category: "Science Fiction",
     image: "https://covers.openlibrary.org/b/id/384801-L.jpg",
     stock: 17,
-    ratingAverage: 4.7,
-    ratingCount: 543,
   },
   {
     title: "The Code Breaker",
@@ -161,8 +133,6 @@ const books = [
     category: "Biography",
     image: "https://covers.openlibrary.org/b/id/10215285-L.jpg",
     stock: 21,
-    ratingAverage: 4.5,
-    ratingCount: 289,
   },
   {
     title: "The Thursday Murder Club",
@@ -172,8 +142,6 @@ const books = [
     category: "Mystery",
     image: "https://covers.openlibrary.org/b/id/10189481-L.jpg",
     stock: 26,
-    ratingAverage: 4.6,
-    ratingCount: 378,
   },
   {
     title: "A Brief History of Time",
@@ -183,8 +151,6 @@ const books = [
     category: "Science Fiction",
     image: "https://covers.openlibrary.org/b/id/376903-L.jpg",
     stock: 13,
-    ratingAverage: 4.4,
-    ratingCount: 312,
   },
   {
     title: "Circe",
@@ -194,8 +160,6 @@ const books = [
     category: "Fantasy",
     image: "https://covers.openlibrary.org/b/id/10062819-L.jpg",
     stock: 23,
-    ratingAverage: 4.7,
-    ratingCount: 456,
   },
   {
     title: "Cracking the Coding Interview",
@@ -205,8 +169,6 @@ const books = [
     category: "Programming",
     image: "https://covers.openlibrary.org/b/id/6887313-L.jpg",
     stock: 11,
-    ratingAverage: 4.6,
-    ratingCount: 267,
   },
 ];
 
