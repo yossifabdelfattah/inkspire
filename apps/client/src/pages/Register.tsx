@@ -7,7 +7,7 @@ import { useAuth } from '../context/useAuth';
 function Register() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { register, signInWithGoogle, loading, user } = useAuth();
+  const { register, signInWithGoogle, authLoading, actionLoading, user } = useAuth();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -49,10 +49,10 @@ function Register() {
 
   // Redirect authenticated users away from register page when already signed in
   useEffect(() => {
-    if (!loading && user) {
+    if (!authLoading && user) {
       void navigate(redirectTo, { replace: true });
     }
-  }, [user, loading, navigate, redirectTo]);
+  }, [user, authLoading, navigate, redirectTo]);
 
   return (
     <S.Page role="main">
@@ -133,10 +133,10 @@ function Register() {
           />
 
           <S.Actions>
-            <Button type="submit" disabled={loading} aria-disabled={loading}>
-              {loading ? <Loader size="xs" /> : 'Create account'}
+            <Button type="submit" disabled={actionLoading} aria-disabled={actionLoading}>
+              {actionLoading ? <Loader size="xs" /> : 'Create account'}
             </Button>
-            <Button type="button" variant="default" onClick={() => { void handleGoogle(); }} disabled={loading} aria-disabled={loading}>
+            <Button type="button" variant="default" onClick={() => { void handleGoogle(); }} disabled={actionLoading} aria-disabled={actionLoading}>
               Continue with Google
             </Button>
           </S.Actions>

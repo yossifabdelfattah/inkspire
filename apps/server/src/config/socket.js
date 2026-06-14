@@ -4,7 +4,7 @@ let io = null;
 
 const initSocket = (httpServer) => {
   io = new Server(httpServer, {
-    cors: { origin: '*' },
+    cors: { origin: process.env.CLIENT_URL },
   });
 
   io.on('connection', (socket) => {

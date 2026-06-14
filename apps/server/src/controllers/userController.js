@@ -1,7 +1,7 @@
 const User = require('../models/User');
 
 // GET /api/users/me — returns the MongoDB profile (incl. role) for the authenticated Firebase user
-const getMe = async (req, res) => {
+const getMe = async (req, res, next) => {
   try {
     const user = await User.findById(req.user.mongoId).select('name email role firebaseUid');
     if (!user) {
@@ -10,12 +10,12 @@ const getMe = async (req, res) => {
 
     res.status(200).json(user);
   } catch (error) {
-    res.status(500).json({ message: 'Failed to fetch profile', error: error.message });
+    next(error);
   }
 };
 
 // PATCH /api/users/me — allows the authenticated user to update their own display name
-const updateMe = async (req, res) => {
+const updateMe = async (req, res, next) => {
   try {
     const { name } = req.body;
 
@@ -35,7 +35,7 @@ const updateMe = async (req, res) => {
 
     res.status(200).json(user);
   } catch (error) {
-    res.status(500).json({ message: 'Failed to update profile', error: error.message });
+    next(error);
   }
 };
 

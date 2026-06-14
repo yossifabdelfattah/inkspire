@@ -9,5 +9,3 @@ export interface CreateBookRequestPayload {
 export async function createBookRequest(payload: CreateBookRequestPayload): Promise<void> {
   await api.post('/book-requests', payload);
 }
-
-export default { createBookRequest };

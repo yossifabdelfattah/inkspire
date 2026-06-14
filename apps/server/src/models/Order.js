@@ -78,4 +78,7 @@ const orderSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Speeds up getMyOrders / getRecommendations (Order.find({ user })).
+orderSchema.index({ user: 1, createdAt: -1 });
+
 module.exports = mongoose.model('Order', orderSchema);

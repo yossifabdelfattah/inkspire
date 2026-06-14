@@ -7,9 +7,19 @@ import Categories from '../components/home/Categories';
 import WhyChoose from '../components/home/WhyChoose';
 import CTABanner from '../components/home/CTABanner';
 import { useCart } from '../context/useCart';
+import { useFetch } from '../hooks/useFetch';
+import { getBooks } from '../services/bookService';
+import type { Book } from '../types/product';
 
 function Home() {
   const { addToCart } = useCart();
+
+  const { data: featuredBooks, loading: featuredLoading, error: featuredError } = useFetch<Book[]>(
+    async (signal) => (await getBooks({ sort: 'rating' }, signal)).slice(0, 8),
+    [],
+    [],
+    'Failed to load books.'
+  );
 
   return (
     <>
@@ -59,7 +69,12 @@ function Home() {
           />
         </S.HeroVisual>
       </S.HeroSection>
-      <FeaturedBooks onAddToCart={addToCart} />
+      <FeaturedBooks
+        books={featuredBooks}
+        loading={featuredLoading}
+        error={featuredError}
+        onAddToCart={addToCart}
+      />
       <RecommendedBooks onAddToCart={addToCart} />
       <Categories />
       <WhyChoose />

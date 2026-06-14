@@ -5,10 +5,7 @@ const Order = require('../models/Order');
 const InventoryReservation = require('../models/InventoryReservation');
 const { expireReservationIfNeeded } = require('../services/reservationCleanupService');
 const { withOptionalTransaction } = require('../utils/transaction');
-
-const FREE_SHIPPING_THRESHOLD = 50;
-const STANDARD_SHIPPING_COST = 4.99;
-const EXPRESS_SHIPPING_COST = 14.99;
+const { getShippingPrice } = require('../config/shipping');
 
 const ALLOWED_PAYMENT_METHODS = ['card', 'paypal', 'cod'];
 const ALLOWED_DELIVERY_METHODS = ['standard', 'express', 'pickup'];
@@ -20,12 +17,6 @@ const DELIVERY_ESTIMATES = {
 };
 
 const requiredShippingFields = ['fullName', 'email', 'address', 'city', 'postal', 'country'];
-
-const getShippingPrice = (deliveryMethod, itemsPrice) => {
-  if (deliveryMethod === 'express') return EXPRESS_SHIPPING_COST;
-  if (deliveryMethod === 'pickup') return 0;
-  return itemsPrice >= FREE_SHIPPING_THRESHOLD ? 0 : STANDARD_SHIPPING_COST;
-};
 
 // Simulates a payment provider charge. No real payment integration and no
 // card data is ever accepted or stored — this only returns a mock receipt.

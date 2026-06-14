@@ -29,7 +29,7 @@ function mapToBook(item: BookApiItem, index = 0): Book {
   };
 }
 
-export async function getBooks(params?: GetBooksParams): Promise<Book[]> {
+export async function getBooks(params?: GetBooksParams, signal?: AbortSignal): Promise<Book[]> {
   // Build query string from params
   const queryParams = new URLSearchParams();
   if (params?.search) queryParams.append('search', params.search);
@@ -41,15 +41,15 @@ export async function getBooks(params?: GetBooksParams): Promise<Book[]> {
   const queryString = queryParams.toString();
   const endpoint = queryString ? `/books?${queryString}` : '/books';
 
-  const res = await api.get(endpoint);
+  const res = await api.get(endpoint, { signal });
   const items: BookApiItem[] = Array.isArray(res.data) ? res.data : res.data?.items ?? [];
 
   return items.map((it, i) => mapToBook(it, i));
 }
 
-export async function getBookById(id: string | number): Promise<Book | null> {
+export async function getBookById(id: string | number, signal?: AbortSignal): Promise<Book | null> {
   try {
-    const res = await api.get(`/books/${id}`);
+    const res = await api.get(`/books/${id}`, { signal });
     return mapToBook(res.data);
   } catch (err) {
     // A 404 means the book genuinely doesn't exist — a valid "not found" result.
@@ -61,15 +61,15 @@ export async function getBookById(id: string | number): Promise<Book | null> {
   }
 }
 
-export async function getRecommendations(limit = 8): Promise<Book[]> {
-  const res = await api.get(`/books/recommendations?limit=${limit}`);
+export async function getRecommendations(limit = 8, signal?: AbortSignal): Promise<Book[]> {
+  const res = await api.get(`/books/recommendations?limit=${limit}`, { signal });
   const items: BookApiItem[] = Array.isArray(res.data) ? res.data : [];
 
   return items.map((it, i) => mapToBook(it, i));
 }
 
-export async function getRelatedBooks(id: string | number, limit = 6): Promise<Book[]> {
-  const res = await api.get(`/books/${id}/related?limit=${limit}`);
+export async function getRelatedBooks(id: string | number, limit = 6, signal?: AbortSignal): Promise<Book[]> {
+  const res = await api.get(`/books/${id}/related?limit=${limit}`, { signal });
   const items: BookApiItem[] = Array.isArray(res.data) ? res.data : [];
 
   return items.map((it, i) => mapToBook(it, i));

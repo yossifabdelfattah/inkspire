@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useReducer, useState } from 'react';
 import { Stepper, Alert, Button, Divider } from '@mantine/core';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/useCart';
@@ -14,68 +14,111 @@ import PaymentStep from '../components/checkout/PaymentStep';
 import ConfirmationStep from '../components/checkout/ConfirmationStep';
 import * as S from './Checkout.styled';
 import * as StepS from '../components/checkout/CheckoutSteps.styled';
+import { getShippingPrice } from '../constants/shipping';
 
 const STEP_LABELS = ['Cart Review', 'Shipping', 'Delivery', 'Payment', 'Confirmation'];
 
 const EMPTY_SHIPPING: ShippingInfo = { fullName: '', email: '', address: '', city: '', postal: '', country: '' };
-
-const FREE_SHIPPING_THRESHOLD = 50;
-const EXPRESS_SHIPPING_COST = 14.99;
-const STANDARD_SHIPPING_COST = 4.99;
-
-function getShippingPrice(deliveryMethod: DeliveryMethod, itemsPrice: number) {
-  if (deliveryMethod === 'express') return EXPRESS_SHIPPING_COST;
-  if (deliveryMethod === 'pickup') return 0;
-  return itemsPrice >= FREE_SHIPPING_THRESHOLD ? 0 : STANDARD_SHIPPING_COST;
-}
 
 function getApiErrorMessage(err: unknown, fallback: string) {
   const response = (err as { response?: { data?: { message?: string } } })?.response;
   return response?.data?.message ?? fallback;
 }
 
+interface CheckoutState {
+  step: number;
+  reservation: Reservation | null;
+  reservationLoading: boolean;
+  reservationError: string | null;
+  expired: boolean;
+  checkoutResult: CheckoutResult | null;
+  checkoutLoading: boolean;
+  checkoutError: string | null;
+}
+
+type CheckoutAction =
+  | { type: 'GOTO_STEP'; step: number }
+  | { type: 'RESERVE_START' }
+  | { type: 'RESERVE_SUCCESS'; reservation: Reservation }
+  | { type: 'RESERVE_ERROR'; error: string }
+  | { type: 'CHECKOUT_START' }
+  | { type: 'CHECKOUT_SUCCESS'; result: CheckoutResult }
+  | { type: 'CHECKOUT_ERROR'; error: string }
+  | { type: 'EXPIRE' };
+
+const initialCheckoutState: CheckoutState = {
+  step: 0,
+  reservation: null,
+  reservationLoading: false,
+  reservationError: null,
+  expired: false,
+  checkoutResult: null,
+  checkoutLoading: false,
+  checkoutError: null,
+};
+
+function checkoutReducer(state: CheckoutState, action: CheckoutAction): CheckoutState {
+  switch (action.type) {
+    case 'GOTO_STEP':
+      return { ...state, step: action.step };
+    case 'RESERVE_START':
+      return { ...state, reservationLoading: true, reservationError: null };
+    case 'RESERVE_SUCCESS':
+      return { ...state, reservationLoading: false, reservation: action.reservation, step: 1 };
+    case 'RESERVE_ERROR':
+      return { ...state, reservationLoading: false, reservationError: action.error };
+    case 'CHECKOUT_START':
+      return { ...state, checkoutLoading: true, checkoutError: null };
+    case 'CHECKOUT_SUCCESS':
+      return { ...state, checkoutLoading: false, checkoutResult: action.result, step: 4 };
+    case 'CHECKOUT_ERROR':
+      return { ...state, checkoutLoading: false, checkoutError: action.error };
+    case 'EXPIRE':
+      return { ...state, expired: true };
+    default:
+      return state;
+  }
+}
+
 function Checkout() {
   const { cartItems, totalPrice, clearCart } = useCart();
   const navigate = useNavigate();
 
-  const [step, setStep] = useState(0);
-  const [reservation, setReservation] = useState<Reservation | null>(null);
-  const [reservationLoading, setReservationLoading] = useState(false);
-  const [reservationError, setReservationError] = useState<string | null>(null);
-  const [expired, setExpired] = useState(false);
+  const [state, dispatch] = useReducer(checkoutReducer, initialCheckoutState);
+  const {
+    step,
+    reservation,
+    reservationLoading,
+    reservationError,
+    expired,
+    checkoutResult,
+    checkoutLoading,
+    checkoutError,
+  } = state;
 
   const [shippingInfo, setShippingInfo] = useState<ShippingInfo>(EMPTY_SHIPPING);
   const [deliveryMethod, setDeliveryMethod] = useState<DeliveryMethod>('standard');
   const [paymentMethod, setPaymentMethod] = useState('card');
 
-  const [checkoutResult, setCheckoutResult] = useState<CheckoutResult | null>(null);
-  const [checkoutLoading, setCheckoutLoading] = useState(false);
-  const [checkoutError, setCheckoutError] = useState<string | null>(null);
-
   const handleExpire = useCallback(() => {
-    setExpired(true);
+    dispatch({ type: 'EXPIRE' });
   }, []);
 
   const handleReserve = async () => {
-    setReservationLoading(true);
-    setReservationError(null);
+    dispatch({ type: 'RESERVE_START' });
 
     try {
       const res = await createReservation(cartItems.map((item) => ({ id: item.id, quantity: item.quantity })));
-      setReservation(res);
-      setStep(1);
+      dispatch({ type: 'RESERVE_SUCCESS', reservation: res });
     } catch (err) {
-      setReservationError(getApiErrorMessage(err, 'Unable to reserve your items. Please try again.'));
-    } finally {
-      setReservationLoading(false);
+      dispatch({ type: 'RESERVE_ERROR', error: getApiErrorMessage(err, 'Unable to reserve your items. Please try again.') });
     }
   };
 
   const handleCheckout = async () => {
     if (!reservation) return;
 
-    setCheckoutLoading(true);
-    setCheckoutError(null);
+    dispatch({ type: 'CHECKOUT_START' });
 
     try {
       const result = await checkout({
@@ -84,18 +127,15 @@ function Checkout() {
         paymentMethod,
         deliveryMethod,
       });
-      setCheckoutResult(result);
       clearCart();
-      setStep(4);
+      dispatch({ type: 'CHECKOUT_SUCCESS', result });
     } catch (err) {
       const status = (err as { response?: { status?: number } })?.response?.status;
       if (status === 410) {
-        setExpired(true);
+        dispatch({ type: 'EXPIRE' });
       } else {
-        setCheckoutError(getApiErrorMessage(err, 'Something went wrong while placing your order. Please try again.'));
+        dispatch({ type: 'CHECKOUT_ERROR', error: getApiErrorMessage(err, 'Something went wrong while placing your order. Please try again.') });
       }
-    } finally {
-      setCheckoutLoading(false);
     }
   };
 
@@ -186,7 +226,7 @@ function Checkout() {
           <ShippingStep
             value={shippingInfo}
             onChange={setShippingInfo}
-            onNext={() => setStep(2)}
+            onNext={() => dispatch({ type: 'GOTO_STEP', step: 2 })}
             expiresAt={reservation.expiresAt}
             onExpire={handleExpire}
           />
@@ -197,8 +237,8 @@ function Checkout() {
             value={deliveryMethod}
             onChange={setDeliveryMethod}
             itemsPrice={itemsPrice}
-            onBack={() => setStep(1)}
-            onNext={() => setStep(3)}
+            onBack={() => dispatch({ type: 'GOTO_STEP', step: 1 })}
+            onNext={() => dispatch({ type: 'GOTO_STEP', step: 3 })}
             expiresAt={reservation.expiresAt}
             onExpire={handleExpire}
           />
@@ -208,7 +248,7 @@ function Checkout() {
           <PaymentStep
             value={paymentMethod}
             onChange={setPaymentMethod}
-            onBack={() => setStep(2)}
+            onBack={() => dispatch({ type: 'GOTO_STEP', step: 2 })}
             onSubmit={handleCheckout}
             loading={checkoutLoading}
             error={checkoutError}

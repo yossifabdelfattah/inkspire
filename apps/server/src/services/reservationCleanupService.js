@@ -41,23 +41,28 @@ const releaseReservedStock = async (bookId, quantity, session) => {
 // exactly once. Safe to call repeatedly — only reservations that are still
 // 'active' and past their expiry are touched, so completed/expired
 // reservations are never re-processed.
-const expireReservationIfNeeded = async (reservation) => {
+const expireReservationIfNeeded = async (reservation, session) => {
   if (reservation.status !== 'active' || reservation.expiresAt > new Date()) {
     return false;
   }
 
   const result = await InventoryReservation.updateOne(
     { _id: reservation._id, status: 'active' },
-    { $set: { status: 'expired' } }
+    { $set: { status: 'expired' } },
+    { session }
   );
 
   // Another request (e.g. checkout or a concurrent cleanup pass) already
   // expired/completed this reservation — don't release stock twice.
   if (result.modifiedCount === 0) {
+    // Refresh our in-memory copy so the caller sees the authoritative status
+    // that "won" the race, instead of a stale 'active'.
+    const current = await InventoryReservation.findById(reservation._id, 'status', { session });
+    if (current) reservation.status = current.status;
     return false;
   }
 
-  await Promise.all(reservation.items.map((item) => releaseReservedStock(item.book, item.quantity)));
+  await Promise.all(reservation.items.map((item) => releaseReservedStock(item.book, item.quantity, session)));
 
   reservation.status = 'expired';
   return true;

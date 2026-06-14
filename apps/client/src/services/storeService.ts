@@ -10,10 +10,8 @@ export interface StoreAvailability {
   stock: number;
 }
 
-export async function getBookStores(bookId: string | number): Promise<StoreAvailability[]> {
-  const res = await api.get(`/books/${bookId}/stores`);
+export async function getBookStores(bookId: string | number, signal?: AbortSignal): Promise<StoreAvailability[]> {
+  const res = await api.get(`/books/${bookId}/stores`, { signal });
 
   return Array.isArray(res.data) ? res.data : [];
 }
-
-export default { getBookStores };

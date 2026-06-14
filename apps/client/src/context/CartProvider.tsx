@@ -44,7 +44,10 @@ useEffect(() => {
         );
       }
 
-      return [...prev, { ...book, quantity: 1 }];
+      return [
+        ...prev,
+        { id: book.id, cover: book.cover, title: book.title, author: book.author, price: book.price, quantity: 1 },
+      ];
     });
   }, []);
 

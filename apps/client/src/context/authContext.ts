@@ -3,8 +3,8 @@ import type { UserProfile } from '../types/auth';
 
 export interface AuthContextType {
   user: UserProfile | null;
-  loading: boolean;
-  roleLoading: boolean;
+  authLoading: boolean;
+  actionLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, name?: string) => Promise<void>;
   logout: () => Promise<void>;

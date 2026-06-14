@@ -7,7 +7,7 @@ import { useAuth } from '../context/useAuth';
 function Login() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, signInWithGoogle, loading, user } = useAuth();
+  const { login, signInWithGoogle, authLoading, actionLoading, user } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -41,10 +41,10 @@ function Login() {
 
   // Redirect authenticated users away from auth pages
   useEffect(() => {
-    if (!loading && user) {
+    if (!authLoading && user) {
       void navigate(redirectTo, { replace: true });
     }
-  }, [user, loading, navigate, redirectTo]);
+  }, [user, authLoading, navigate, redirectTo]);
 
   return (
     <S.Page role="main">
@@ -86,10 +86,10 @@ function Login() {
           />
 
           <S.Actions>
-            <Button type="submit" disabled={loading} aria-disabled={loading}>
-              {loading ? <Loader size="xs" /> : 'Sign in'}
+            <Button type="submit" disabled={actionLoading} aria-disabled={actionLoading}>
+              {actionLoading ? <Loader size="xs" /> : 'Sign in'}
             </Button>
-            <Button type="button" variant="default" onClick={() => { void handleGoogle(); }} disabled={loading} aria-disabled={loading}>
+            <Button type="button" variant="default" onClick={() => { void handleGoogle(); }} disabled={actionLoading} aria-disabled={actionLoading}>
               Sign in with Google
             </Button>
           </S.Actions>

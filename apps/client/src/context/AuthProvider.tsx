@@ -19,16 +19,14 @@ interface AuthProviderProps {
 
 export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [roleLoading, setRoleLoading] = useState(true);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(false);
 
   useEffect(() => {
     const unsubscribe = subscribeToAuthState((currentUser) => {
       setUser(currentUser);
-      setLoading(false);
 
       if (currentUser) {
-        setRoleLoading(true);
         getMyProfile()
           .then((profile) => {
             setUser((prev) => (prev ? { ...prev, role: profile.role } : prev));
@@ -37,10 +35,10 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
             // Role stays undefined if the backend profile can't be fetched
           })
           .finally(() => {
-            setRoleLoading(false);
+            setAuthLoading(false);
           });
       } else {
-        setRoleLoading(false);
+        setAuthLoading(false);
       }
     });
 
@@ -48,16 +46,16 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {
-    setLoading(true);
+    setActionLoading(true);
     try {
       await loginWithEmailPassword(email, password);
     } finally {
-      setLoading(false);
+      setActionLoading(false);
     }
   }, []);
 
   const register = useCallback(async (email: string, password: string, name?: string) => {
-    setLoading(true);
+    setActionLoading(true);
     try {
       await registerWithEmailPassword(email, password, name);
 
@@ -70,25 +68,25 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
         }
       }
     } finally {
-      setLoading(false);
+      setActionLoading(false);
     }
   }, []);
 
   const logout = useCallback(async () => {
-    setLoading(true);
+    setActionLoading(true);
     try {
       await logoutUser();
     } finally {
-      setLoading(false);
+      setActionLoading(false);
     }
   }, []);
 
   const googleSignIn = useCallback(async () => {
-    setLoading(true);
+    setActionLoading(true);
     try {
       await signInWithGoogle();
     } finally {
-      setLoading(false);
+      setActionLoading(false);
     }
   }, []);
 
@@ -98,8 +96,8 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   const value = useMemo(
-    () => ({ user, loading, roleLoading, login, register, logout, signInWithGoogle: googleSignIn, updateProfile }),
-    [user, loading, roleLoading, login, register, logout, googleSignIn, updateProfile]
+    () => ({ user, authLoading, actionLoading, login, register, logout, signInWithGoogle: googleSignIn, updateProfile }),
+    [user, authLoading, actionLoading, login, register, logout, googleSignIn, updateProfile]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

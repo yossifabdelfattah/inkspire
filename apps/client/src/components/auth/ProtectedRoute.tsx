@@ -8,10 +8,10 @@ interface ProtectedRouteProps {
 }
 
 function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { user, loading } = useAuth();
+  const { user, authLoading } = useAuth();
   const location = useLocation();
 
-  if (loading) {
+  if (authLoading) {
     return (
       <Center mih="100vh" role="status" aria-live="polite" aria-label="Loading authentication state">
         <Loader />

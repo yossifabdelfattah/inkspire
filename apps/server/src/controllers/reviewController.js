@@ -3,9 +3,10 @@ const Review = require('../models/Review');
 const Book = require('../models/Book');
 const { getIO } = require('../config/socket');
 const { recalculateBookRating } = require('../services/ratingService');
+const { withOptionalTransaction } = require('../utils/transaction');
 
 // GET /api/books/:bookId/reviews
-const getBookReviews = async (req, res) => {
+const getBookReviews = async (req, res, next) => {
   try {
     const { bookId } = req.params;
 
@@ -16,13 +17,13 @@ const getBookReviews = async (req, res) => {
     const reviews = await Review.find({ book: bookId }).sort({ createdAt: -1 });
     res.status(200).json(reviews);
   } catch (error) {
-    res.status(500).json({ message: 'Failed to fetch reviews', error: error.message });
+    next(error);
   }
 };
 
 // POST /api/books/:bookId/reviews
 // Creates the user's review, or updates it if one already exists (one rating per user per book)
-const upsertBookReview = async (req, res) => {
+const upsertBookReview = async (req, res, next) => {
   try {
     const { bookId } = req.params;
     const { rating, comment } = req.body;
@@ -41,19 +42,23 @@ const upsertBookReview = async (req, res) => {
       return res.status(404).json({ message: 'Book not found' });
     }
 
-    const review = await Review.findOneAndUpdate(
-      { book: bookId, user: req.user.mongoId },
-      {
-        book: bookId,
-        user: req.user.mongoId,
-        userName: req.user.email ?? 'Anonymous',
-        rating: ratingNum,
-        comment: comment?.trim() ?? '',
-      },
-      { new: true, upsert: true, runValidators: true }
-    );
+    const { review, ratingAverage, ratingCount } = await withOptionalTransaction(async (session) => {
+      const review = await Review.findOneAndUpdate(
+        { book: bookId, user: req.user.mongoId },
+        {
+          book: bookId,
+          user: req.user.mongoId,
+          userName: req.user.email ?? 'Anonymous',
+          rating: ratingNum,
+          comment: comment?.trim() ?? '',
+        },
+        { new: true, upsert: true, runValidators: true, session }
+      );
 
-    const { ratingAverage, ratingCount } = await recalculateBookRating(bookId);
+      const { ratingAverage, ratingCount } = await recalculateBookRating(bookId, session);
+
+      return { review, ratingAverage, ratingCount };
+    });
 
     const io = getIO();
     if (io) {
@@ -67,7 +72,7 @@ const upsertBookReview = async (req, res) => {
 
     res.status(200).json({ review, ratingAverage, ratingCount });
   } catch (error) {
-    res.status(500).json({ message: 'Failed to save review', error: error.message });
+    next(error);
   }
 };
 

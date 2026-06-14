@@ -1,10 +1,8 @@
 import { Button } from '@mantine/core';
 import type { DeliveryMethod } from '../../services/checkoutService';
+import { FREE_SHIPPING_THRESHOLD, STANDARD_SHIPPING_COST, EXPRESS_SHIPPING_COST } from '../../constants/shipping';
 import ReservationTimer from './ReservationTimer';
 import * as S from './CheckoutSteps.styled';
-
-const FREE_SHIPPING_THRESHOLD = 50;
-const EXPRESS_COST = 14.99;
 
 interface DeliveryStepProps {
   value: DeliveryMethod;
@@ -17,7 +15,7 @@ interface DeliveryStepProps {
 }
 
 function DeliveryStep({ value, onChange, itemsPrice, onBack, onNext, expiresAt, onExpire }: DeliveryStepProps) {
-  const standardCost = itemsPrice >= FREE_SHIPPING_THRESHOLD ? 0 : 4.99;
+  const standardCost = itemsPrice >= FREE_SHIPPING_THRESHOLD ? 0 : STANDARD_SHIPPING_COST;
 
   return (
     <S.StepCard initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
@@ -39,7 +37,7 @@ function DeliveryStep({ value, onChange, itemsPrice, onBack, onNext, expiresAt, 
           <input type="radio" name="delivery" value="express" checked={value === 'express'} onChange={() => onChange('express')} style={{ display: 'none' }} />
           <S.OptionTitle>
             <span>Express Delivery</span>
-            <span>${EXPRESS_COST.toFixed(2)}</span>
+            <span>${EXPRESS_SHIPPING_COST.toFixed(2)}</span>
           </S.OptionTitle>
           <S.OptionDesc>Estimated delivery: 1-2 business days</S.OptionDesc>
         </S.OptionCard>

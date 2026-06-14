@@ -5,7 +5,7 @@ const normalize = (value) => value.trim().toLowerCase();
 const calculatePriorityScore = (requestCount) => requestCount * 10;
 
 // POST /api/book-requests
-const createBookRequest = async (req, res) => {
+const createBookRequest = async (req, res, next) => {
   try {
     const { title, author, note } = req.body;
 
@@ -38,15 +38,12 @@ const createBookRequest = async (req, res) => {
 
     res.status(201).json({ message: 'Book request created', request: newRequest });
   } catch (error) {
-    res.status(500).json({
-      message: 'Failed to create book request',
-      error: error.message,
-    });
+    next(error);
   }
 };
 
 // GET /api/book-requests
-const getBookRequests = async (req, res) => {
+const getBookRequests = async (req, res, next) => {
   try {
     const { status } = req.query;
     const filter = {};
@@ -55,15 +52,12 @@ const getBookRequests = async (req, res) => {
     const requests = await BookRequest.find(filter).sort({ priorityScore: -1, createdAt: -1 });
     res.status(200).json(requests);
   } catch (error) {
-    res.status(500).json({
-      message: 'Failed to fetch book requests',
-      error: error.message,
-    });
+    next(error);
   }
 };
 
 // PATCH /api/book-requests/:id (admin) — approve or reject a request
-const updateBookRequestStatus = async (req, res) => {
+const updateBookRequestStatus = async (req, res, next) => {
   try {
     const { status } = req.body;
 
@@ -78,10 +72,7 @@ const updateBookRequestStatus = async (req, res) => {
 
     res.status(200).json(request);
   } catch (error) {
-    res.status(500).json({
-      message: 'Failed to update book request',
-      error: error.message,
-    });
+    next(error);
   }
 };
 

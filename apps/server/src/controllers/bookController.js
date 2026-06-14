@@ -5,7 +5,7 @@ const Order = require("../models/Order");
 const Inventory = require("../models/Inventory");
 
 // GET all books with search, filter, and sort
-const getBooks = async (req, res) => {
+const getBooks = async (req, res, next) => {
   try {
     const { search, category, minPrice, maxPrice, sort } = req.query;
 
@@ -56,10 +56,7 @@ const getBooks = async (req, res) => {
 
     res.status(200).json(books);
   } catch (error) {
-    res.status(500).json({
-      message: 'Failed to fetch books',
-      error: error.message,
-    });
+    next(error);
   }
 };
 
@@ -68,7 +65,7 @@ const getBooks = async (req, res) => {
 //  - Logged-in users with order history: top-rated books from categories they've
 //    previously purchased, excluding books they already own.
 //  - Anonymous users / users with no orders: top-rated books overall.
-const getRecommendations = async (req, res) => {
+const getRecommendations = async (req, res, next) => {
   try {
     const limit = Math.min(parseInt(req.query.limit) || 8, 20);
     const mongoId = req.user?.mongoId;
@@ -111,17 +108,14 @@ const getRecommendations = async (req, res) => {
 
     res.status(200).json(books);
   } catch (error) {
-    res.status(500).json({
-      message: 'Failed to fetch recommendations',
-      error: error.message,
-    });
+    next(error);
   }
 };
 
 // GET /api/books/:id/related
 // Returns other books in the same category, falling back to top-rated books overall
 // if there aren't enough in the same category.
-const getRelatedBooks = async (req, res) => {
+const getRelatedBooks = async (req, res, next) => {
   try {
     const { id } = req.params;
     const limit = Math.min(parseInt(req.query.limit) || 6, 20);
@@ -150,16 +144,13 @@ const getRelatedBooks = async (req, res) => {
 
     res.status(200).json(related);
   } catch (error) {
-    res.status(500).json({
-      message: 'Failed to fetch related books',
-      error: error.message,
-    });
+    next(error);
   }
 };
 
 // GET /api/books/:id/stores
 // Returns the physical stores that currently have this book in stock.
-const getBookStores = async (req, res) => {
+const getBookStores = async (req, res, next) => {
   try {
     const { id } = req.params;
 
@@ -185,15 +176,12 @@ const getBookStores = async (req, res) => {
 
     res.status(200).json(stores);
   } catch (error) {
-    res.status(500).json({
-      message: 'Failed to fetch store availability',
-      error: error.message,
-    });
+    next(error);
   }
 };
 
 // GET single book by ID
-const getBookById = async (req, res) => {
+const getBookById = async (req, res, next) => {
   try {
     const book = await Book.findById(req.params.id);
 
@@ -203,15 +191,12 @@ const getBookById = async (req, res) => {
 
     res.status(200).json(book);
   } catch (error) {
-    res.status(500).json({
-      message: 'Failed to fetch book',
-      error: error.message,
-    });
+    next(error);
   }
 };
 
 // POST /api/books
-const createBook = async (req, res) => {
+const createBook = async (req, res, next) => {
   try {
     const { title, author, description, price, category, image, stock } = req.body;
 
@@ -222,15 +207,12 @@ const createBook = async (req, res) => {
     const newBook = await Book.create({ title, author, description, price, category, image, stock });
     res.status(201).json(newBook);
   } catch (error) {
-    res.status(500).json({
-      message: 'Failed to create book',
-      error: error.message,
-    });
+    next(error);
   }
 };
 
 // PUT /api/books/:id (admin)
-const updateBook = async (req, res) => {
+const updateBook = async (req, res, next) => {
   try {
     const { title, author, description, price, category, image, stock } = req.body;
 
@@ -250,15 +232,12 @@ const updateBook = async (req, res) => {
     const updated = await book.save();
     res.status(200).json(updated);
   } catch (error) {
-    res.status(500).json({
-      message: 'Failed to update book',
-      error: error.message,
-    });
+    next(error);
   }
 };
 
 // DELETE /api/books/:id (admin)
-const deleteBook = async (req, res) => {
+const deleteBook = async (req, res, next) => {
   try {
     const book = await Book.findByIdAndDelete(req.params.id);
     if (!book) {
@@ -267,10 +246,7 @@ const deleteBook = async (req, res) => {
 
     res.status(200).json({ message: 'Book deleted' });
   } catch (error) {
-    res.status(500).json({
-      message: 'Failed to delete book',
-      error: error.message,
-    });
+    next(error);
   }
 };
 

@@ -69,4 +69,9 @@ const bookSchema = new mongoose.Schema(
   }
 );
 
+// Speeds up category filtering (getBooks) and rating-based sorts
+// (getBooks?sort=rating, getRecommendations, getRelatedBooks).
+bookSchema.index({ category: 1 });
+bookSchema.index({ ratingAverage: -1 });
+
 module.exports = mongoose.model("Book", bookSchema);

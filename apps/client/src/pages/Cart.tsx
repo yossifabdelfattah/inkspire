@@ -1,14 +1,14 @@
 import { Button, NumberInput, Divider, Alert } from '@mantine/core';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/useCart';
+import { FREE_SHIPPING_THRESHOLD, STANDARD_SHIPPING_COST } from '../constants/shipping';
 import * as S from './Cart.styled';
 
 function Cart() {
   const { cartItems, updateQuantity, removeFromCart, clearCart, totalPrice } = useCart();
 
-  const freeShippingThreshold = 50;
-  const shippingCost = totalPrice >= freeShippingThreshold ? 0 : 4.99;
-  const remainingForFree = Math.max(0, freeShippingThreshold - totalPrice);
+  const shippingCost = totalPrice >= FREE_SHIPPING_THRESHOLD ? 0 : STANDARD_SHIPPING_COST;
+  const remainingForFree = Math.max(0, FREE_SHIPPING_THRESHOLD - totalPrice);
 
   return (
     <S.Page initial={{ opacity: 0 }} animate={{ opacity: 1 }}>

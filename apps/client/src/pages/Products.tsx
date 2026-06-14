@@ -6,6 +6,7 @@ import BookCard from '../components/books/BookCard';
 import { useCart } from '../context/useCart';
 import type { Book } from '../types/product';
 import * as S from './Products.styled';
+import { useFetch } from '../hooks/useFetch';
 
 import { getBooks } from '../services/bookService';
 
@@ -13,10 +14,6 @@ const CATEGORIES = ['All', 'Fiction', 'Programming', 'Self-help', 'Science Ficti
 
 function Products() {
   const [searchParams, setSearchParams] = useSearchParams();
-
-  const [books, setBooks] = useState<Book[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   const [query, setQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
@@ -50,34 +47,20 @@ function Products() {
   }, [query]);
 
   // Fetch books when filters change
-  useEffect(() => {
-    let mounted = true;
-
-    (async () => {
-      setLoading(true);
-      setError(null);
-
-      try {
-        const data = await getBooks({
+  const { data: books, loading, error } = useFetch<Book[]>(
+    (signal) =>
+      getBooks(
+        {
           search: debouncedQuery,
           category,
           sort: sort !== 'relevance' ? sort : undefined,
-        });
-        if (!mounted) return;
-        setBooks(data);
-      } catch {
-        if (!mounted) return;
-        setError('Failed to fetch books');
-        setBooks([]);
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    })();
-
-    return () => {
-      mounted = false;
-    };
-  }, [debouncedQuery, category, sort]);
+        },
+        signal
+      ),
+    [debouncedQuery, category, sort],
+    [],
+    'Failed to fetch books'
+  );
 
   const { addToCart } = useCart();
 

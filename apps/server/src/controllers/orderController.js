@@ -1,9 +1,8 @@
 const mongoose = require('mongoose');
 const Order = require('../models/Order');
 const Book = require('../models/Book');
-
-const FREE_SHIPPING_THRESHOLD = 50;
-const SHIPPING_COST = 4.99;
+const { getShippingPrice } = require('../config/shipping');
+const { withOptionalTransaction } = require('../utils/transaction');
 
 const requiredShippingFields = ['fullName', 'email', 'address', 'city', 'postal', 'country'];
 
@@ -52,35 +51,56 @@ const createOrder = async (req, res, next) => {
       itemsPrice += book.price * quantity;
     }
 
-    const shippingPrice = itemsPrice >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_COST;
+    const shippingPrice = getShippingPrice('standard', itemsPrice);
     const totalPrice = itemsPrice + shippingPrice;
 
-    // Reduce stock for each ordered book
-    await Promise.all(
-      orderItems.map((item) =>
-        Book.updateOne({ _id: item.product }, { $inc: { stock: -item.quantity } })
-      )
-    );
+    const order = await withOptionalTransaction(async (session) => {
+      // Atomically decrement stock for each ordered book, guarding against
+      // concurrent orders depleting stock between the validation above and now.
+      for (const item of orderItems) {
+        const updated = await Book.findOneAndUpdate(
+          { _id: item.product, stock: { $gte: item.quantity } },
+          { $inc: { stock: -item.quantity } },
+          { session }
+        );
 
-    const order = await Order.create({
-      user: req.user.mongoId,
-      orderItems,
-      shippingInfo: {
-        fullName: shippingInfo.fullName.trim(),
-        email: shippingInfo.email.trim(),
-        address: shippingInfo.address.trim(),
-        city: shippingInfo.city.trim(),
-        postal: shippingInfo.postal.trim(),
-        country: shippingInfo.country.trim()
-      },
-      paymentMethod: paymentMethod || 'card',
-      itemsPrice,
-      shippingPrice,
-      totalPrice
+        if (!updated) {
+          const err = new Error(`Not enough stock for "${item.title}"`);
+          err.statusCode = 409;
+          throw err;
+        }
+      }
+
+      const [created] = await Order.create(
+        [
+          {
+            user: req.user.mongoId,
+            orderItems,
+            shippingInfo: {
+              fullName: shippingInfo.fullName.trim(),
+              email: shippingInfo.email.trim(),
+              address: shippingInfo.address.trim(),
+              city: shippingInfo.city.trim(),
+              postal: shippingInfo.postal.trim(),
+              country: shippingInfo.country.trim()
+            },
+            paymentMethod: paymentMethod || 'card',
+            itemsPrice,
+            shippingPrice,
+            totalPrice
+          }
+        ],
+        { session }
+      );
+
+      return created;
     });
 
     res.status(201).json(order);
   } catch (error) {
+    if (error.statusCode) {
+      return res.status(error.statusCode).json({ message: error.message });
+    }
     next(error);
   }
 };

@@ -17,6 +17,7 @@ function ReservationTimer({ expiresAt, onExpire }: ReservationTimerProps) {
       setRemainingMs(remaining);
 
       if (remaining <= 0) {
+        clearInterval(interval);
         onExpire();
       }
     }, 1000);

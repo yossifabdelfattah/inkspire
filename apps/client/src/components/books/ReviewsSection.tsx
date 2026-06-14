@@ -47,7 +47,12 @@ function ReviewsSection({ bookId, ratingAverage, ratingCount }: ReviewsSectionPr
 
   useEffect(() => {
     const socket = getSocket();
-    socket.emit('joinBookRoom', bookId);
+
+    // Re-join the room on every (re)connect, since the server's room
+    // membership is tied to the socket connection and is lost on reconnect.
+    const joinRoom = () => socket.emit('joinBookRoom', bookId);
+    if (socket.connected) joinRoom();
+    socket.on('connect', joinRoom);
 
     const handleUpdate = (payload: { bookId: string } & ReviewSummary) => {
       if (payload.bookId !== bookId) return;
@@ -63,6 +68,7 @@ function ReviewsSection({ bookId, ratingAverage, ratingCount }: ReviewsSectionPr
     socket.on('review:updated', handleUpdate);
 
     return () => {
+      socket.off('connect', joinRoom);
       socket.emit('leaveBookRoom', bookId);
       socket.off('review:updated', handleUpdate);
     };

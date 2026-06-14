@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { NumberInput, Button, Rating, Alert, Skeleton } from '@mantine/core';
 import { motion } from 'framer-motion';
@@ -7,6 +7,7 @@ import type { Book } from '../types/product';
 import * as S from './ProductDetails.styled';
 import { useCart } from '../context/useCart';
 import { getBookById, getRelatedBooks } from '../services/bookService';
+import { useFetch } from '../hooks/useFetch';
 import ReviewsSection from '../components/books/ReviewsSection';
 import FeaturedBooks from '../components/books/FeaturedBooks';
 import StoreAvailabilityMap from '../components/books/StoreAvailabilityMap';
@@ -17,57 +18,20 @@ function ProductDetails() {
   const { addToCart } = useCart();
 
   const [qty, setQty] = useState(1);
-  const [book, setBook] = useState<Book | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [relatedBooks, setRelatedBooks] = useState<Book[]>([]);
-  const [relatedLoading, setRelatedLoading] = useState(true);
-  const [relatedError, setRelatedError] = useState<string | null>(null);
 
-  useEffect(() => {
-    let mounted = true;
+  const { data: book, loading, error } = useFetch<Book | null>(
+    (signal) => getBookById(bookId, signal),
+    [bookId],
+    null,
+    'Failed to load book.'
+  );
 
-    (async () => {
-      try {
-        const b = await getBookById(bookId);
-        if (!mounted) return;
-
-        if (b === null) {
-          setError('Book not found');
-        } else {
-          setBook(b);
-        }
-      } catch (err) {
-        if (!mounted) return;
-        setError(`Failed to load book: ${err instanceof Error ? err.message : 'Unknown error'}`);
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    })();
-
-    return () => {
-      mounted = false;
-    };
-  }, [bookId]);
-
-  useEffect(() => {
-    let mounted = true;
-
-    getRelatedBooks(bookId)
-      .then((data) => {
-        if (mounted) setRelatedBooks(data);
-      })
-      .catch(() => {
-        if (mounted) setRelatedError('Failed to load related books.');
-      })
-      .finally(() => {
-        if (mounted) setRelatedLoading(false);
-      });
-
-    return () => {
-      mounted = false;
-    };
-  }, [bookId]);
+  const { data: relatedBooks, loading: relatedLoading, error: relatedError } = useFetch<Book[]>(
+    (signal) => getRelatedBooks(bookId, undefined, signal),
+    [bookId],
+    [],
+    'Failed to load related books.'
+  );
 
   if (loading) {
     return (

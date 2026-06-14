@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -6,6 +5,7 @@ import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import { getBookStores, type StoreAvailability } from '../../services/storeService';
+import { useFetch } from '../../hooks/useFetch';
 import * as S from './StoreAvailabilityMap.styled';
 
 delete (L.Icon.Default.prototype as unknown as { _getIconUrl?: unknown })._getIconUrl;
@@ -23,31 +23,12 @@ const getDirectionsUrl = (lat: number, lng: number) =>
   `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
 
 const StoreAvailabilityMap = ({ bookId }: StoreAvailabilityMapProps) => {
-  const [stores, setStores] = useState<StoreAvailability[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    setLoading(true);
-    setError(null);
-
-    getBookStores(bookId)
-      .then((data) => {
-        if (isMounted) setStores(data);
-      })
-      .catch(() => {
-        if (isMounted) setError('Failed to load store availability.');
-      })
-      .finally(() => {
-        if (isMounted) setLoading(false);
-      });
-
-    return () => {
-      isMounted = false;
-    };
-  }, [bookId]);
+  const { data: stores, loading, error } = useFetch<StoreAvailability[]>(
+    (signal) => getBookStores(bookId, signal),
+    [bookId],
+    [],
+    'Failed to load store availability.'
+  );
 
   if (loading) {
     return <S.EmptyState>Checking store availability…</S.EmptyState>;
