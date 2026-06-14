@@ -1,4 +1,3 @@
-const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 
 const connectDB = require("../config/db");
@@ -8,22 +7,35 @@ const books = require("../data/books");
 
 dotenv.config();
 
-connectDB();
+// Modes:
+//   (no flag)   - seed only if the books collection is empty (same as --if-empty)
+//   --if-empty  - only seed when the books collection is empty
+//   --fresh     - delete existing books, then reseed
+const args = process.argv.slice(2);
+const fresh = args.includes("--fresh");
 
 const importData = async () => {
   try {
-    // clear existing books
-    await Book.deleteMany();
+    await connectDB();
 
-    // insert sample books
-    await Book.insertMany(books);
+    if (fresh) {
+      await Book.deleteMany();
+      await Book.insertMany(books);
+      console.log(`Books reseeded successfully (${books.length} books)`);
+    } else {
+      const existingCount = await Book.countDocuments();
 
-    console.log("Books seeded successfully");
+      if (existingCount > 0) {
+        console.log(`Books collection already has ${existingCount} document(s); skipping seed.`);
+      } else {
+        await Book.insertMany(books);
+        console.log(`Books seeded successfully (${books.length} books)`);
+      }
+    }
 
-    process.exit();
+    process.exit(0);
   } catch (error) {
     console.error(error);
-
     process.exit(1);
   }
 };

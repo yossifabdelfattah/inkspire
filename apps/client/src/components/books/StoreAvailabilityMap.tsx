@@ -25,17 +25,24 @@ const getDirectionsUrl = (lat: number, lng: number) =>
 const StoreAvailabilityMap = ({ bookId }: StoreAvailabilityMapProps) => {
   const [stores, setStores] = useState<StoreAvailability[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let isMounted = true;
 
     setLoading(true);
-    getBookStores(bookId).then((data) => {
-      if (isMounted) {
-        setStores(data);
-        setLoading(false);
-      }
-    });
+    setError(null);
+
+    getBookStores(bookId)
+      .then((data) => {
+        if (isMounted) setStores(data);
+      })
+      .catch(() => {
+        if (isMounted) setError('Failed to load store availability.');
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
+      });
 
     return () => {
       isMounted = false;
@@ -44,6 +51,10 @@ const StoreAvailabilityMap = ({ bookId }: StoreAvailabilityMapProps) => {
 
   if (loading) {
     return <S.EmptyState>Checking store availability…</S.EmptyState>;
+  }
+
+  if (error) {
+    return <S.EmptyState role="alert">{error}</S.EmptyState>;
   }
 
   if (stores.length === 0) {

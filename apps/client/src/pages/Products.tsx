@@ -7,7 +7,6 @@ import { useCart } from '../context/useCart';
 import type { Book } from '../types/product';
 import * as S from './Products.styled';
 
-import SAMPLE_BOOKS from '../mocks/books';
 import { getBooks } from '../services/bookService';
 
 const CATEGORIES = ['All', 'Fiction', 'Programming', 'Self-help', 'Science Fiction', 'Mystery', 'History', 'Fantasy', 'Biography'];
@@ -69,7 +68,7 @@ function Products() {
       } catch {
         if (!mounted) return;
         setError('Failed to fetch books');
-        setBooks(SAMPLE_BOOKS);
+        setBooks([]);
       } finally {
         if (mounted) setLoading(false);
       }

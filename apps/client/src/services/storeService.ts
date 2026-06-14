@@ -11,16 +11,9 @@ export interface StoreAvailability {
 }
 
 export async function getBookStores(bookId: string | number): Promise<StoreAvailability[]> {
-  try {
-    const res = await api.get(`/books/${bookId}/stores`);
-    if (Array.isArray(res?.data)) {
-      return res.data;
-    }
-  } catch {
-    // No store availability data — caller should show the empty state
-  }
+  const res = await api.get(`/books/${bookId}/stores`);
 
-  return [];
+  return Array.isArray(res.data) ? res.data : [];
 }
 
 export default { getBookStores };

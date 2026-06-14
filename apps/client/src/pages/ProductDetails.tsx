@@ -22,6 +22,7 @@ function ProductDetails() {
   const [error, setError] = useState<string | null>(null);
   const [relatedBooks, setRelatedBooks] = useState<Book[]>([]);
   const [relatedLoading, setRelatedLoading] = useState(true);
+  const [relatedError, setRelatedError] = useState<string | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -55,6 +56,9 @@ function ProductDetails() {
     getRelatedBooks(bookId)
       .then((data) => {
         if (mounted) setRelatedBooks(data);
+      })
+      .catch(() => {
+        if (mounted) setRelatedError('Failed to load related books.');
       })
       .finally(() => {
         if (mounted) setRelatedLoading(false);
@@ -154,6 +158,7 @@ function ProductDetails() {
             <FeaturedBooks
               books={relatedBooks}
               loading={relatedLoading}
+              error={relatedError}
               headingId={`related-books-heading-${book.id}`}
               title="Related Books"
               subtitle="More books you might enjoy."

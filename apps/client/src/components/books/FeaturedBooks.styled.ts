@@ -48,3 +48,10 @@ export const Empty = styled.p`
   margin: 0;
   padding: ${({ theme }) => theme.spacing.lg};
 `;
+
+export const ErrorText = styled.p`
+  text-align: center;
+  color: ${({ theme }) => theme.colors.error};
+  margin: 0;
+  padding: ${({ theme }) => theme.spacing.lg};
+`;

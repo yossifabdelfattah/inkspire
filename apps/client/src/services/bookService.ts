@@ -1,7 +1,7 @@
+import { isAxiosError } from 'axios';
 import api from '../api/axios';
 import type { Book } from '../types/product';
 import type { BookApiItem } from '../types/backend';
-import SAMPLE_BOOKS from '../mocks/books';
 
 interface GetBooksParams {
   search?: string;
@@ -30,73 +30,49 @@ function mapToBook(item: BookApiItem, index = 0): Book {
 }
 
 export async function getBooks(params?: GetBooksParams): Promise<Book[]> {
-  try {
-    // Build query string from params
-    const queryParams = new URLSearchParams();
-    if (params?.search) queryParams.append('search', params.search);
-    if (params?.category && params.category !== 'All') queryParams.append('category', params.category);
-    if (params?.minPrice) queryParams.append('minPrice', String(params.minPrice));
-    if (params?.maxPrice) queryParams.append('maxPrice', String(params.maxPrice));
-    if (params?.sort) queryParams.append('sort', params.sort);
-    
-    const queryString = queryParams.toString();
-    const endpoint = queryString ? `/books?${queryString}` : '/books';
-    
-    const res = await api.get(endpoint);
-    if (res?.data) {
-      const items: BookApiItem[] = Array.isArray(res.data) ? res.data : res.data.items ?? [];
-      if (items.length > 0) return items.map((it, i) => mapToBook(it, i));
-      return [];
-    }
-  } catch {
-    // Fall back to mock data only on API failure
-  }
+  // Build query string from params
+  const queryParams = new URLSearchParams();
+  if (params?.search) queryParams.append('search', params.search);
+  if (params?.category && params.category !== 'All') queryParams.append('category', params.category);
+  if (params?.minPrice) queryParams.append('minPrice', String(params.minPrice));
+  if (params?.maxPrice) queryParams.append('maxPrice', String(params.maxPrice));
+  if (params?.sort) queryParams.append('sort', params.sort);
 
-  return SAMPLE_BOOKS;
+  const queryString = queryParams.toString();
+  const endpoint = queryString ? `/books?${queryString}` : '/books';
+
+  const res = await api.get(endpoint);
+  const items: BookApiItem[] = Array.isArray(res.data) ? res.data : res.data?.items ?? [];
+
+  return items.map((it, i) => mapToBook(it, i));
 }
 
 export async function getBookById(id: string | number): Promise<Book | null> {
   try {
     const res = await api.get(`/books/${id}`);
-    if (res?.data) {
-      return mapToBook(res.data);
+    return mapToBook(res.data);
+  } catch (err) {
+    // A 404 means the book genuinely doesn't exist — a valid "not found" result.
+    if (isAxiosError(err) && err.response?.status === 404) {
+      return null;
     }
-  } catch {
-    // Fall back to mock data on API failure
+
+    throw err;
   }
-
-  // Try mock data as fallback
-  const found = SAMPLE_BOOKS.find((b) => String(b.id) === String(id));
-  if (found) return found;
-
-  // Return null to indicate book not found
-  return null;
 }
 
 export async function getRecommendations(limit = 8): Promise<Book[]> {
-  try {
-    const res = await api.get(`/books/recommendations?limit=${limit}`);
-    if (Array.isArray(res?.data)) {
-      return res.data.map((it: BookApiItem, i: number) => mapToBook(it, i));
-    }
-  } catch {
-    // No recommendations available — caller should hide the section
-  }
+  const res = await api.get(`/books/recommendations?limit=${limit}`);
+  const items: BookApiItem[] = Array.isArray(res.data) ? res.data : [];
 
-  return [];
+  return items.map((it, i) => mapToBook(it, i));
 }
 
 export async function getRelatedBooks(id: string | number, limit = 6): Promise<Book[]> {
-  try {
-    const res = await api.get(`/books/${id}/related?limit=${limit}`);
-    if (Array.isArray(res?.data)) {
-      return res.data.map((it: BookApiItem, i: number) => mapToBook(it, i));
-    }
-  } catch {
-    // No related books available — caller should hide the section
-  }
+  const res = await api.get(`/books/${id}/related?limit=${limit}`);
+  const items: BookApiItem[] = Array.isArray(res.data) ? res.data : [];
 
-  return [];
+  return items.map((it, i) => mapToBook(it, i));
 }
 
 export default { getBooks, getBookById, getRecommendations, getRelatedBooks };
