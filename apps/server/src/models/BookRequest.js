@@ -33,6 +33,10 @@ const bookRequestSchema = new mongoose.Schema(
       type: String, // Firebase UID — optional, not an ObjectId
       default: null,
     },
+    requesters: {
+      type: [String], // Firebase UIDs that have voted for this request
+      default: [],
+    },
     requestCount: {
       type: Number,
       default: 1,

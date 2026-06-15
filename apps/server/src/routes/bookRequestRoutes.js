@@ -1,12 +1,12 @@
 const express = require('express');
 const { createBookRequest, getBookRequests, updateBookRequestStatus } = require('../controllers/bookRequestController');
-const { verifyFirebaseToken, requireAdmin } = require('../middleware/firebaseAuthMiddleware');
+const { verifyFirebaseToken, requireAdmin, attachUserIfPresent } = require('../middleware/firebaseAuthMiddleware');
 const { validateObjectId } = require('../middleware/validateObjectId');
 
 const router = express.Router();
 
 // POST /api/book-requests
-router.post('/', createBookRequest);
+router.post('/', attachUserIfPresent, createBookRequest);
 
 // GET /api/book-requests (admin only)
 router.get('/', verifyFirebaseToken, requireAdmin, getBookRequests);

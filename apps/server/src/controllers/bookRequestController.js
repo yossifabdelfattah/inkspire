@@ -17,10 +17,16 @@ const createBookRequest = async (req, res, next) => {
     const normalizedAuthor = normalize(author);
 
     const existing = await BookRequest.findOne({ normalizedTitle, normalizedAuthor });
+    const uid = req.user?.uid ?? null;
 
     if (existing) {
+      if (uid && existing.requesters.includes(uid)) {
+        return res.status(200).json({ message: 'You have already requested this book', request: existing });
+      }
+
       existing.requestCount += 1;
       existing.priorityScore = calculatePriorityScore(existing.requestCount);
+      if (uid) existing.requesters.push(uid);
       await existing.save();
       return res.status(200).json({ message: 'Request already exists — vote count increased', request: existing });
     }
@@ -31,7 +37,8 @@ const createBookRequest = async (req, res, next) => {
       normalizedTitle,
       normalizedAuthor,
       note: note?.trim() || '',
-      requestedBy: req.user?.uid ?? null,
+      requestedBy: uid,
+      requesters: uid ? [uid] : [],
       requestCount: 1,
       priorityScore: calculatePriorityScore(1),
     });
