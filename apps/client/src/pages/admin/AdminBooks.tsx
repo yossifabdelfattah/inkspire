@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Table, Button, Modal, TextInput, NumberInput, Textarea, Alert, Loader, ActionIcon, Group } from '@mantine/core';
+import { Table, Button, Modal, Alert, Loader, ActionIcon, Group } from '@mantine/core';
 import AdminLayout from './AdminLayout';
+import BookFormFields from './BookFormFields';
 import { createBook, updateBook, deleteBook, getAllBooks, type AdminBookPayload } from '../../services/adminService';
 import type { BookApiItem } from '../../types/backend';
 import { useFetch } from '../../hooks/useFetch';
@@ -146,13 +147,7 @@ function AdminBooks() {
             </Alert>
           )}
 
-          <TextInput label="Title" value={form.title} onChange={(e) => handleChange('title', e.currentTarget.value)} required mb="sm" />
-          <TextInput label="Author" value={form.author} onChange={(e) => handleChange('author', e.currentTarget.value)} required mb="sm" />
-          <Textarea label="Description" value={form.description} onChange={(e) => handleChange('description', e.currentTarget.value)} required mb="sm" minRows={2} />
-          <TextInput label="Category" value={form.category} onChange={(e) => handleChange('category', e.currentTarget.value)} required mb="sm" />
-          <TextInput label="Image URL" value={form.image} onChange={(e) => handleChange('image', e.currentTarget.value)} required mb="sm" />
-          <NumberInput label="Price" value={form.price} onChange={(v) => handleChange('price', Number(v) || 0)} min={0} decimalScale={2} required mb="sm" />
-          <NumberInput label="Stock" value={form.stock} onChange={(v) => handleChange('stock', Number(v) || 0)} min={0} required mb="md" />
+          <BookFormFields form={form} onChange={handleChange} />
 
           <Button type="submit" loading={saving} fullWidth>
             {editingId ? 'Save Changes' : 'Create Book'}

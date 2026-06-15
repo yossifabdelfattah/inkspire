@@ -90,6 +90,24 @@ export async function updateBookRequestStatus(id: string, status: 'approved' | '
   return res.data;
 }
 
+export interface BookCandidate {
+  title: string;
+  author: string;
+  description: string;
+  category: string;
+  image: string;
+}
+
+export interface BookCandidateResult {
+  candidates: BookCandidate[];
+  message?: string;
+}
+
+export async function getBookRequestCandidates(id: string, signal?: AbortSignal): Promise<BookCandidateResult> {
+  const res = await api.get(`/book-requests/${id}/candidates`, { signal });
+  return res.data;
+}
+
 export interface AdminBookPayload {
   title: string;
   author: string;

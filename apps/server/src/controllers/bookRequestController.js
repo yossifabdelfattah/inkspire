@@ -1,4 +1,5 @@
 const BookRequest = require('../models/BookRequest');
+const { searchBookCandidates } = require('../services/bookMetadataService');
 
 const normalize = (value) => value.trim().toLowerCase();
 
@@ -83,4 +84,23 @@ const updateBookRequestStatus = async (req, res, next) => {
   }
 };
 
-module.exports = { createBookRequest, getBookRequests, updateBookRequestStatus };
+// GET /api/book-requests/:id/candidates (admin) — metadata suggestions for prefilling "Add Book"
+const getBookRequestCandidates = async (req, res, next) => {
+  try {
+    const request = await BookRequest.findById(req.params.id);
+    if (!request) {
+      return res.status(404).json({ message: 'Book request not found' });
+    }
+
+    try {
+      const candidates = await searchBookCandidates(request.title, request.author);
+      res.status(200).json({ candidates });
+    } catch {
+      res.status(200).json({ candidates: [], message: 'Book metadata lookup is currently unavailable.' });
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = { createBookRequest, getBookRequests, updateBookRequestStatus, getBookRequestCandidates };
