@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { NumberInput, Button, Rating, Alert, Skeleton } from '@mantine/core';
 import { motion } from 'framer-motion';
-import type { ProductDetailsRouteParamKey } from '../types';
-import type { Book } from '../types/product';
-import * as S from './ProductDetails.styled';
+import type { BookDetailsRouteParamKey } from '../types';
+import type { Book } from '../types/book';
+import * as S from './BookDetails.styled';
 import { useCart } from '../context/useCart';
 import { getBookById, getRelatedBooks } from '../services/bookService';
 import { useFetch } from '../hooks/useFetch';
@@ -12,8 +12,8 @@ import ReviewsSection from '../components/books/ReviewsSection';
 import FeaturedBooks from '../components/books/FeaturedBooks';
 import StoreAvailabilityMap from '../components/books/StoreAvailabilityMap';
 
-function ProductDetails() {
-  const { id } = useParams<ProductDetailsRouteParamKey>();
+function BookDetails() {
+  const { id } = useParams<BookDetailsRouteParamKey>();
   const bookId = id ?? '';
   const { addToCart } = useCart();
 
@@ -137,4 +137,4 @@ function ProductDetails() {
   );
 }
 
-export default ProductDetails;
+export default BookDetails;

@@ -1,6 +1,6 @@
 import { isAxiosError } from 'axios';
 import api from '../api/axios';
-import type { Book } from '../types/product';
+import type { Book } from '../types/book';
 import type { BookApiItem } from '../types/backend';
 
 interface GetBooksParams {
@@ -27,6 +27,7 @@ function mapToBook(item: BookApiItem, index = 0): Book {
     ratingCount: item.ratingCount ?? 0,
     inStock: availableStock > 0,
     availableStock,
+    category: item.category ?? '',
   };
 }
 

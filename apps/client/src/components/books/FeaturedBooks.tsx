@@ -1,4 +1,4 @@
-import type { Book } from '../../types/product';
+import type { Book } from '../../types/book';
 import BookCard from './BookCard';
 import BookCardSkeleton from './BookCardSkeleton';
 import * as S from './FeaturedBooks.styled';

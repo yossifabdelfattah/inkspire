@@ -1,5 +1,5 @@
 import { createContext } from 'react';
-import type { Book } from '../types/product';
+import type { Book } from '../types/book';
 
 export interface CartItem extends Pick<Book, 'id' | 'cover' | 'title' | 'author' | 'price' | 'availableStock'> {
   quantity: number;

@@ -1,4 +1,4 @@
-import type { Book } from '../../types/product';
+import type { Book } from '../../types/book';
 import FeaturedBooks from './FeaturedBooks';
 import { getRecommendations } from '../../services/bookService';
 import { useFetch } from '../../hooks/useFetch';

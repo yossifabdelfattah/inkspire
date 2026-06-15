@@ -4,15 +4,15 @@ import { TextInput, Select, Skeleton } from '@mantine/core';
 import { motion } from 'framer-motion';
 import BookCard from '../components/books/BookCard';
 import { useCart } from '../context/useCart';
-import type { Book } from '../types/product';
-import * as S from './Products.styled';
+import type { Book } from '../types/book';
+import * as S from './Books.styled';
 import { useFetch } from '../hooks/useFetch';
 
 import { getBooks } from '../services/bookService';
 
 const CATEGORIES = ['All', 'Fiction', 'Programming', 'Self-help', 'Science Fiction', 'Mystery', 'History', 'Fantasy', 'Biography'];
 
-function Products() {
+function Books() {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [query, setQuery] = useState('');
@@ -119,4 +119,4 @@ function Products() {
   );
 }
 
-export default Products;
+export default Books;

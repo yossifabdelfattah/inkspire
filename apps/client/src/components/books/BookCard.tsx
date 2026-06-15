@@ -1,5 +1,5 @@
 import { Badge, Button, Rating } from '@mantine/core';
-import type { Book } from '../../types/product';
+import type { Book } from '../../types/book';
 import * as S from './BookCard.styled';
 
 interface BookCardProps {

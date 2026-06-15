@@ -9,7 +9,7 @@ import CTABanner from '../components/home/CTABanner';
 import { useCart } from '../context/useCart';
 import { useFetch } from '../hooks/useFetch';
 import { getBooks } from '../services/bookService';
-import type { Book } from '../types/product';
+import type { Book } from '../types/book';
 
 function Home() {
   const { addToCart } = useCart();

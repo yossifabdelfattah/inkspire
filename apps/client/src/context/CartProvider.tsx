@@ -1,6 +1,6 @@
 import { useMemo, useState, useCallback, useEffect } from 'react';
 import type { ReactNode, FC } from 'react';
-import type { Book } from '../types/product';
+import type { Book } from '../types/book';
 import { CartContext, type CartItem } from './cartContext';
 
 export type { CartContextType } from './cartContext';

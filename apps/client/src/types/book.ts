@@ -1,9 +1,3 @@
-export interface Product {
-  _id: string;
-  name: string;
-  price: number;
-}
-
 export interface Book {
   id: string;
   cover: string;
@@ -15,6 +9,7 @@ export interface Book {
   ratingCount: number;
   inStock: boolean;
   availableStock: number;
+  category: string;
 }
 
-export type ProductDetailsRouteParamKey = 'id';
+export type BookDetailsRouteParamKey = 'id';

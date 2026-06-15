@@ -5,8 +5,8 @@ import Home from '../pages/Home';
 import Login from '../pages/Login';
 import NotFound from '../pages/NotFound';
 import Profile from '../pages/Profile';
-import ProductDetails from '../pages/ProductDetails';
-import Products from '../pages/Products';
+import BookDetails from '../pages/BookDetails';
+import Books from '../pages/Books';
 import Register from '../pages/Register';
 import RequestBook from '../pages/RequestBook';
 import AdminOverview from '../pages/admin/AdminOverview';
@@ -22,8 +22,8 @@ function AppRouter() {
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
-      <Route path="/books" element={<Products />} />
-      <Route path="/books/:id" element={<ProductDetails />} />
+      <Route path="/books" element={<Books />} />
+      <Route path="/books/:id" element={<BookDetails />} />
       <Route path="/request-a-book" element={<RequestBook />} />
       <Route path="/products" element={<Navigate to="/books" replace />} />
       <Route path="/products/:id" element={<Navigate to="/books" replace />} />

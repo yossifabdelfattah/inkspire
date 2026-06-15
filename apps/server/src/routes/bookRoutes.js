@@ -14,8 +14,8 @@ const {
 const { verifyFirebaseToken, requireAdmin, attachUserIfPresent } = require("../middleware/firebaseAuthMiddleware");
 const { validateObjectId } = require("../middleware/validateObjectId");
 
-// GET all books
-router.get("/", getBooks);
+// GET all books (attaches the user if logged in, so search logs can record who searched)
+router.get("/", attachUserIfPresent, getBooks);
 
 // GET personalized recommendations (works for both logged-in and anonymous users)
 router.get("/recommendations", attachUserIfPresent, getRecommendations);
