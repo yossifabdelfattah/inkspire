@@ -9,6 +9,7 @@ export interface Book {
   cover: string;
   title: string;
   author: string;
+  description: string;
   price: number;
   rating: number;
   ratingCount: number;

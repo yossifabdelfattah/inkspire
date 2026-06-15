@@ -103,6 +103,10 @@ const getReservation = async (req, res, next) => {
       return res.status(404).json({ message: 'Reservation not found' });
     }
 
+    if (reservation.userId && String(reservation.userId) !== String(req.user?.mongoId)) {
+      return res.status(403).json({ message: 'This reservation does not belong to you' });
+    }
+
     await expireReservationIfNeeded(reservation);
 
     res.status(200).json(reservation);

@@ -21,6 +21,7 @@ function mapToBook(item: BookApiItem, index = 0): Book {
     cover: item.image && item.image.length > 0 ? item.image : '/placeholder-cover.png',
     title: item.title,
     author: item.author ?? 'Unknown Author',
+    description: item.description ?? '',
     price: item.price,
     rating: item.ratingAverage ?? 0,
     ratingCount: item.ratingCount ?? 0,

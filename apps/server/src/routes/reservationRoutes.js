@@ -8,6 +8,6 @@ const router = express.Router();
 router.post('/', attachUserIfPresent, createReservation);
 
 // GET /api/reservations/:id
-router.get('/:id', getReservation);
+router.get('/:id', attachUserIfPresent, getReservation);
 
 module.exports = router;

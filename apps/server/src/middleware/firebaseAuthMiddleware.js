@@ -35,6 +35,7 @@ const resolveUserFromAuthHeader = async (authHeader) => {
     return {
       uid: decoded.uid,
       email: decoded.email,
+      name: user.name,
       role: user.role,
       mongoId: user._id,
     };

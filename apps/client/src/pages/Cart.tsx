@@ -38,10 +38,14 @@ function Cart() {
                     <NumberInput
                       value={item.quantity}
                       min={1}
+                      max={Math.max(item.availableStock, 1)}
                       onChange={(v) => updateQuantity(item.id, Number(v ?? 1))}
                       aria-label={`Quantity for ${item.title}`}
                       size="sm"
                     />
+                    {item.quantity >= item.availableStock && (
+                      <S.StockNote>Only {item.availableStock} in stock</S.StockNote>
+                    )}
                     <S.RemoveRow>
                       <Button color="red" size="sm" onClick={() => removeFromCart(item.id)} aria-label={`Remove ${item.title} from cart`}>
                         Remove

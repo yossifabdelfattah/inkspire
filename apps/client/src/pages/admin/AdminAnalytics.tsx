@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import { Loader, Alert, Table } from '@mantine/core';
 import { ResponsiveContainer, LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import AdminLayout from './AdminLayout';
@@ -12,38 +11,34 @@ import {
   type MostRequestedBook,
   type TopPurchasedBook,
 } from '../../services/adminService';
+import { useFetch } from '../../hooks/useFetch';
 import * as S from './AdminLayout.styled';
 
+interface AnalyticsData {
+  sales: SalesPoint[];
+  searches: TopSearchTerm[];
+  requested: MostRequestedBook[];
+  purchased: TopPurchasedBook[];
+}
+
+const emptyData: AnalyticsData = { sales: [], searches: [], requested: [], purchased: [] };
+
 function AdminAnalytics() {
-  const [sales, setSales] = useState<SalesPoint[]>([]);
-  const [searches, setSearches] = useState<TopSearchTerm[]>([]);
-  const [requested, setRequested] = useState<MostRequestedBook[]>([]);
-  const [purchased, setPurchased] = useState<TopPurchasedBook[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-
-  useEffect(() => {
-    let mounted = true;
-
-    Promise.all([getSalesOverTime(), getTopSearches(), getMostRequestedBooks(), getTopPurchasedBooks()])
-      .then(([salesData, searchData, requestedData, purchasedData]) => {
-        if (!mounted) return;
-        setSales(salesData);
-        setSearches(searchData);
-        setRequested(requestedData);
-        setPurchased(purchasedData);
-      })
-      .catch(() => {
-        if (mounted) setError(true);
-      })
-      .finally(() => {
-        if (mounted) setLoading(false);
-      });
-
-    return () => {
-      mounted = false;
-    };
-  }, []);
+  const { data, loading, error } = useFetch<AnalyticsData>(
+    async (signal) => {
+      const [sales, searches, requested, purchased] = await Promise.all([
+        getSalesOverTime(signal),
+        getTopSearches(signal),
+        getMostRequestedBooks(signal),
+        getTopPurchasedBooks(signal),
+      ]);
+      return { sales, searches, requested, purchased };
+    },
+    [],
+    emptyData,
+    'Could not fetch analytics data.'
+  );
+  const { sales, searches, requested, purchased } = data;
 
   if (loading) {
     return (
@@ -58,7 +53,7 @@ function AdminAnalytics() {
     return (
       <AdminLayout>
         <S.SectionTitle>Analytics</S.SectionTitle>
-        <Alert color="red" title="Failed to load analytics">Could not fetch analytics data.</Alert>
+        <Alert color="red" title="Failed to load analytics">{error}</Alert>
       </AdminLayout>
     );
   }

@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Table, Button, Modal, TextInput, NumberInput, Textarea, Alert, Loader, ActionIcon, Group } from '@mantine/core';
 import AdminLayout from './AdminLayout';
-import { createBook, updateBook, deleteBook, type AdminBookPayload } from '../../services/adminService';
+import { createBook, updateBook, deleteBook, getAllBooks, type AdminBookPayload } from '../../services/adminService';
 import type { BookApiItem } from '../../types/backend';
-import api from '../../api/axios';
+import { useFetch } from '../../hooks/useFetch';
 import * as S from './AdminLayout.styled';
 
 const emptyForm: AdminBookPayload = {
@@ -17,48 +17,22 @@ const emptyForm: AdminBookPayload = {
 };
 
 function AdminBooks() {
-  const [books, setBooks] = useState<BookApiItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
+  const { data: books, loading, error } = useFetch<BookApiItem[]>(
+    (signal) => getAllBooks(signal),
+    [reloadKey],
+    [],
+    'Could not fetch the book catalog.'
+  );
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<AdminBookPayload>(emptyForm);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState('');
+  const [deleteError, setDeleteError] = useState('');
 
-  const fetchBooks = () =>
-    api.get('/books').then((res) => {
-      setBooks(Array.isArray(res.data) ? res.data : []);
-    });
-
-  useEffect(() => {
-    let mounted = true;
-
-    fetchBooks()
-      .catch(() => {
-        if (mounted) setError(true);
-      })
-      .finally(() => {
-        if (mounted) setLoading(false);
-      });
-
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
-  const refresh = async () => {
-    setLoading(true);
-    setError(false);
-    try {
-      await fetchBooks();
-    } catch {
-      setError(true);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const refresh = () => setReloadKey((key) => key + 1);
 
   const openCreate = () => {
     setEditingId(null);
@@ -98,7 +72,7 @@ function AdminBooks() {
         await createBook(form);
       }
       setModalOpen(false);
-      await refresh();
+      refresh();
     } catch {
       setFormError('Failed to save book. Please check the fields and try again.');
     } finally {
@@ -108,11 +82,12 @@ function AdminBooks() {
 
   const handleDelete = async (id: string) => {
     if (!window.confirm('Delete this book? This cannot be undone.')) return;
+    setDeleteError('');
     try {
       await deleteBook(id);
-      await refresh();
+      refresh();
     } catch {
-      window.alert('Failed to delete the book.');
+      setDeleteError('Failed to delete the book.');
     }
   };
 
@@ -124,7 +99,8 @@ function AdminBooks() {
       </S.ToolbarRow>
 
       {loading && <Loader size="sm" />}
-      {error && <Alert color="red" title="Failed to load books">Could not fetch the book catalog.</Alert>}
+      {error && <Alert color="red" title="Failed to load books">{error}</Alert>}
+      {deleteError && <Alert color="red" title="Delete failed" mb="sm">{deleteError}</Alert>}
 
       {!loading && !error && (
         <Table striped highlightOnHover withTableBorder>

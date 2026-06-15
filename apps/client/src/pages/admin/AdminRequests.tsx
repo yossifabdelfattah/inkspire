@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Table, Button, Badge, Alert, Loader, Group } from '@mantine/core';
 import AdminLayout from './AdminLayout';
 import { getBookRequests, updateBookRequestStatus, type BookRequestItem } from '../../services/adminService';
+import { useFetch } from '../../hooks/useFetch';
 import * as S from './AdminLayout.styled';
 
 const statusColor: Record<BookRequestItem['status'], string> = {
@@ -11,37 +12,28 @@ const statusColor: Record<BookRequestItem['status'], string> = {
 };
 
 function AdminRequests() {
+  const { data: fetchedRequests, loading, error } = useFetch<BookRequestItem[]>(
+    (signal) => getBookRequests(signal),
+    [],
+    [],
+    'Could not fetch book requests.'
+  );
   const [requests, setRequests] = useState<BookRequestItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const [updateError, setUpdateError] = useState(false);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   useEffect(() => {
-    let mounted = true;
-
-    getBookRequests()
-      .then((data) => {
-        if (mounted) setRequests(data);
-      })
-      .catch(() => {
-        if (mounted) setError(true);
-      })
-      .finally(() => {
-        if (mounted) setLoading(false);
-      });
-
-    return () => {
-      mounted = false;
-    };
-  }, []);
+    setRequests(fetchedRequests);
+  }, [fetchedRequests]);
 
   const handleStatusChange = async (id: string, status: 'approved' | 'rejected') => {
     setUpdatingId(id);
+    setUpdateError(false);
     try {
       const updated = await updateBookRequestStatus(id, status);
       setRequests((prev) => prev.map((r) => (r._id === id ? updated : r)));
     } catch {
-      window.alert('Failed to update request status.');
+      setUpdateError(true);
     } finally {
       setUpdatingId(null);
     }
@@ -52,7 +44,8 @@ function AdminRequests() {
       <S.SectionTitle>Book Requests</S.SectionTitle>
 
       {loading && <Loader size="sm" />}
-      {error && <Alert color="red" title="Failed to load requests">Could not fetch book requests.</Alert>}
+      {error && <Alert color="red" title="Failed to load requests">{error}</Alert>}
+      {updateError && <Alert color="red" title="Update failed" mb="sm">Failed to update request status.</Alert>}
 
       {!loading && !error && requests.length === 0 && <p>No book requests yet.</p>}
 

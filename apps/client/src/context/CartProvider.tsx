@@ -32,21 +32,34 @@ useEffect(() => {
 }, [cartItems]);
 
 
-  const addToCart = useCallback((book: Book) => {
+  const addToCart = useCallback((book: Book, quantity = 1) => {
     setCartItems((prev) => {
+      const maxQty = Math.max(book.availableStock, 0);
       const existing = prev.find((item) => item.id === book.id);
 
       if (existing) {
+        const nextQuantity = Math.min(existing.quantity + quantity, maxQty);
         return prev.map((item) =>
           item.id === book.id
-            ? { ...item, quantity: item.quantity + 1 }
+            ? { ...item, quantity: nextQuantity, availableStock: book.availableStock }
             : item
         );
       }
 
+      const nextQuantity = Math.min(Math.max(quantity, 1), maxQty);
+      if (nextQuantity < 1) return prev;
+
       return [
         ...prev,
-        { id: book.id, cover: book.cover, title: book.title, author: book.author, price: book.price, quantity: 1 },
+        {
+          id: book.id,
+          cover: book.cover,
+          title: book.title,
+          author: book.author,
+          price: book.price,
+          availableStock: book.availableStock,
+          quantity: nextQuantity,
+        },
       ];
     });
   }, []);
@@ -57,7 +70,9 @@ useEffect(() => {
         return prev.filter((item) => item.id !== bookId);
       }
       return prev.map((item) =>
-        item.id === bookId ? { ...item, quantity } : item
+        item.id === bookId
+          ? { ...item, quantity: Math.min(quantity, Math.max(item.availableStock, 0)) }
+          : item
       );
     });
   }, []);

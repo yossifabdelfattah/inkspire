@@ -8,7 +8,6 @@ const morgan = require('morgan');
 const connectDB = require('./config/db');
 const { initSocket } = require('./config/socket');
 // legacy productRoutes removed in favor of books API
-const cartRoutes = require('./routes/cartRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const reservationRoutes = require('./routes/reservationRoutes');
 const checkoutRoutes = require('./routes/checkoutRoutes');
@@ -34,7 +33,6 @@ app.get('/', (req, res) => {
   res.json({ message: 'API is running' });
 });
 
-app.use('/api/cart', cartRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/reservations', reservationRoutes);
 app.use('/api/checkout', checkoutRoutes);

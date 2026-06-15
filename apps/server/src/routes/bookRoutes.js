@@ -12,6 +12,7 @@ const {
   getBookStores,
 } = require("../controllers/bookController");
 const { verifyFirebaseToken, requireAdmin, attachUserIfPresent } = require("../middleware/firebaseAuthMiddleware");
+const { validateObjectId } = require("../middleware/validateObjectId");
 
 // GET all books
 router.get("/", getBooks);
@@ -26,15 +27,15 @@ router.get("/:id/related", getRelatedBooks);
 router.get("/:id/stores", getBookStores);
 
 // GET single book
-router.get("/:id", getBookById);
+router.get("/:id", validateObjectId("id"), getBookById);
 
 // POST create book (admin)
 router.post("/", verifyFirebaseToken, requireAdmin, createBook);
 
 // PUT update book (admin)
-router.put("/:id", verifyFirebaseToken, requireAdmin, updateBook);
+router.put("/:id", verifyFirebaseToken, requireAdmin, validateObjectId("id"), updateBook);
 
 // DELETE book (admin)
-router.delete("/:id", verifyFirebaseToken, requireAdmin, deleteBook);
+router.delete("/:id", verifyFirebaseToken, requireAdmin, validateObjectId("id"), deleteBook);
 
 module.exports = router;

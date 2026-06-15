@@ -48,7 +48,7 @@ const upsertBookReview = async (req, res, next) => {
         {
           book: bookId,
           user: req.user.mongoId,
-          userName: req.user.email ?? 'Anonymous',
+          userName: req.user.name ?? 'Anonymous',
           rating: ratingNum,
           comment: comment?.trim() ?? '',
         },

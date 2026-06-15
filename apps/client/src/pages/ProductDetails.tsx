@@ -63,7 +63,7 @@ function ProductDetails() {
   }
 
   const handleAddToCart = () => {
-    for (let i = 0; i < qty; i++) addToCart(book);
+    addToCart(book, qty);
   };
 
   return (
@@ -91,21 +91,23 @@ function ProductDetails() {
                 value={qty}
                 onChange={(v) => {
                   const parsed = typeof v === 'number' ? v : Number(v);
-                  setQty(Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : 1);
+                  const max = Math.max(book.availableStock, 1);
+                  setQty(Number.isFinite(parsed) && parsed > 0 ? Math.min(Math.floor(parsed), max) : 1);
                 }}
                 min={1}
-                max={99}
+                max={Math.max(book.availableStock, 1)}
                 aria-label="Quantity"
               />
               <Button onClick={handleAddToCart} disabled={!book.inStock} radius="md" aria-label={`Add ${qty} ${book.title} to cart`}>Add to Cart</Button>
             </S.ControlsRow>
+            {book.inStock && book.availableStock <= 5 && (
+              <S.Stock $inStock aria-live="polite">Only {book.availableStock} left in stock</S.Stock>
+            )}
           </div>
 
           <S.Description>
             <S.SectionTitle>Description</S.SectionTitle>
-            <p>
-              This is a placeholder description for <strong>{book.title}</strong>. Replace with real book description from the API later. The description should summarize the book, highlight key themes, and entice readers to purchase.
-            </p>
+            <p>{book.description || 'No description available for this book yet.'}</p>
           </S.Description>
 
           <S.Section>

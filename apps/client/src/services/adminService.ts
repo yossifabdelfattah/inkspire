@@ -50,33 +50,38 @@ export interface BookRequestItem {
   createdAt: string;
 }
 
-export async function getOverview(): Promise<OverviewStats> {
-  const res = await api.get('/admin/analytics/overview');
+export async function getOverview(signal?: AbortSignal): Promise<OverviewStats> {
+  const res = await api.get('/admin/analytics/overview', { signal });
   return res.data;
 }
 
-export async function getSalesOverTime(): Promise<SalesPoint[]> {
-  const res = await api.get('/admin/analytics/sales');
+export async function getSalesOverTime(signal?: AbortSignal): Promise<SalesPoint[]> {
+  const res = await api.get('/admin/analytics/sales', { signal });
   return res.data.sales;
 }
 
-export async function getTopSearches(): Promise<TopSearchTerm[]> {
-  const res = await api.get('/admin/analytics/searches');
+export async function getTopSearches(signal?: AbortSignal): Promise<TopSearchTerm[]> {
+  const res = await api.get('/admin/analytics/searches', { signal });
   return res.data.searches;
 }
 
-export async function getMostRequestedBooks(): Promise<MostRequestedBook[]> {
-  const res = await api.get('/admin/analytics/requests');
+export async function getMostRequestedBooks(signal?: AbortSignal): Promise<MostRequestedBook[]> {
+  const res = await api.get('/admin/analytics/requests', { signal });
   return res.data.requests;
 }
 
-export async function getTopPurchasedBooks(): Promise<TopPurchasedBook[]> {
-  const res = await api.get('/admin/analytics/purchases');
+export async function getTopPurchasedBooks(signal?: AbortSignal): Promise<TopPurchasedBook[]> {
+  const res = await api.get('/admin/analytics/purchases', { signal });
   return res.data.purchases;
 }
 
-export async function getBookRequests(): Promise<BookRequestItem[]> {
-  const res = await api.get('/book-requests');
+export async function getAllBooks(signal?: AbortSignal): Promise<BookApiItem[]> {
+  const res = await api.get('/books', { signal });
+  return Array.isArray(res.data) ? res.data : [];
+}
+
+export async function getBookRequests(signal?: AbortSignal): Promise<BookRequestItem[]> {
+  const res = await api.get('/book-requests', { signal });
   return res.data;
 }
 

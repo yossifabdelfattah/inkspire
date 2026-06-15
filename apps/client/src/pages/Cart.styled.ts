@@ -104,6 +104,11 @@ export const SummaryRow = styled.div`
   align-items: center;
 `;
 
+export const StockNote = styled.span`
+  font-size: ${({ theme }) => theme.font.size.xs};
+  color: ${({ theme }) => theme.colors.textMuted};
+`;
+
 export const Empty = styled.div`
   text-align: center;
   padding: ${({ theme }) => theme.spacing.lg};
