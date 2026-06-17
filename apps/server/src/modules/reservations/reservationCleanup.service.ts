@@ -1,0 +1,127 @@
+import { ClientSession, Types } from 'mongoose';
+import { Book } from '../books/book.model';
+import { InventoryReservation, IInventoryReservation } from './reservation.model';
+
+const CLEANUP_INTERVAL_MS = 30 * 1000; // 30 seconds
+
+// Releases a reservation's held stock without ever driving reservedStock
+// negative. Only ever subtracts `quantity` (clamped at 0) — never resets the
+// whole counter, so other active reservations' holds on the same book are
+// left untouched. If reservedStock was already lower than `quantity`
+// (shouldn't normally happen), the shortfall is logged as a warning.
+export const releaseReservedStock = async (
+  bookId: Types.ObjectId | string,
+  quantity: number,
+  session?: ClientSession | null
+): Promise<void> => {
+  const before = await Book.findById(bookId, 'reservedStock', {
+    session: session ?? undefined,
+  });
+
+  const updated = await Book.findOneAndUpdate(
+    { _id: bookId },
+    [
+      {
+        $set: {
+          reservedStock: {
+            $max: [0, { $subtract: [{ $ifNull: ['$reservedStock', 0] }, quantity] }],
+          },
+        },
+      },
+    ],
+    { session: session ?? undefined, new: true }
+  );
+
+  if (!updated) {
+    console.warn(`[ReservationCleanup] releaseReservedStock: book ${bookId} not found`);
+    return;
+  }
+
+  if (before && before.reservedStock < quantity) {
+    console.warn(
+      `[ReservationCleanup] releaseReservedStock: book ${bookId} reservedStock (${before.reservedStock}) was less than release quantity (${quantity}); clamped to 0.`
+    );
+  }
+};
+
+// Marks a single reservation as 'expired' and releases its held stock,
+// exactly once. Safe to call repeatedly — only reservations that are still
+// 'active' and past their expiry are touched, so completed/expired
+// reservations are never re-processed.
+export const expireReservationIfNeeded = async (
+  reservation: IInventoryReservation,
+  session?: ClientSession | null
+): Promise<boolean> => {
+  if (reservation.status !== 'active' || reservation.expiresAt > new Date()) {
+    return false;
+  }
+
+  const result = await InventoryReservation.updateOne(
+    { _id: reservation._id, status: 'active' },
+    { $set: { status: 'expired' } },
+    { session: session ?? undefined }
+  );
+
+  // Another request (e.g. checkout or a concurrent cleanup pass) already
+  // expired/completed this reservation — don't release stock twice.
+  if (result.modifiedCount === 0) {
+    // Refresh our in-memory copy so the caller sees the authoritative status
+    // that "won" the race, instead of a stale 'active'.
+    const current = await InventoryReservation.findById(reservation._id, 'status', {
+      session: session ?? undefined,
+    });
+    if (current) reservation.status = current.status;
+    return false;
+  }
+
+  await Promise.all(
+    reservation.items.map((item) => releaseReservedStock(item.book, item.quantity, session))
+  );
+
+  reservation.status = 'expired';
+  return true;
+};
+
+// Finds active reservations whose hold has expired, releases the stock they
+// were holding (decrements Book.reservedStock), and marks them 'expired'.
+// Expired reservations are kept in the database for audit/history.
+export const releaseExpiredReservations = async (): Promise<number> => {
+  const expired = await InventoryReservation.find({
+    status: 'active',
+    expiresAt: { $lte: new Date() },
+  });
+
+  let count = 0;
+  for (const reservation of expired) {
+    if (await expireReservationIfNeeded(reservation)) {
+      count += 1;
+    }
+  }
+
+  return count;
+};
+
+let intervalHandle: NodeJS.Timeout | null = null;
+
+export const startReservationCleanupJob = (): NodeJS.Timeout => {
+  if (intervalHandle) return intervalHandle;
+
+  releaseExpiredReservations().catch((err: Error) => {
+    console.error('[ReservationCleanup] Failed to release expired reservations:', err.message);
+  });
+
+  intervalHandle = setInterval(() => {
+    releaseExpiredReservations().catch((err: Error) => {
+      console.error('[ReservationCleanup] Failed to release expired reservations:', err.message);
+    });
+  }, CLEANUP_INTERVAL_MS);
+
+  return intervalHandle;
+};
+
+export const stopReservationCleanupJob = (): void => {
+  if (intervalHandle) {
+    clearInterval(intervalHandle);
+    intervalHandle = null;
+  }
+};
