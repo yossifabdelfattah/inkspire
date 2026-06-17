@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 
 import { BrowserRouter } from 'react-router-dom';
 import App from './App';
+import ErrorBoundary from './components/ErrorBoundary';
 import { GlobalStyles } from './styles/GlobalStyles';
 import { AuthProvider } from './context/AuthProvider';
 import { CartProvider } from './context/CartProvider';
@@ -20,8 +21,10 @@ root.render(
         <BrowserRouter>
           <AuthProvider>
             <CartProvider>
-              <GlobalStyles />
-              <App />
+              <ErrorBoundary>
+                <GlobalStyles />
+                <App />
+              </ErrorBoundary>
             </CartProvider>
           </AuthProvider>
         </BrowserRouter>

@@ -57,7 +57,7 @@ export const searchBookCandidates = async (
 
   const url = `${GOOGLE_BOOKS_URL}?${params.toString()}`;
 
-  const response = await fetch(url);
+  const response = await fetch(url, { signal: AbortSignal.timeout(5000) });
   if (!response.ok) {
     throw new Error(`Google Books API request failed with status ${response.status}`);
   }

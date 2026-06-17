@@ -1,10 +1,25 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useReducer } from 'react';
 import { isAxiosError } from 'axios';
 
 interface UseFetchResult<T> {
   data: T;
   loading: boolean;
   error: string | null;
+}
+
+interface FetchState<T> { data: T; loading: boolean; error: string | null }
+type FetchAction<T> =
+  | { type: 'start' }
+  | { type: 'success'; data: T }
+  | { type: 'error'; message: string };
+
+function fetchReducer<T>(state: FetchState<T>, action: FetchAction<T>): FetchState<T> {
+  switch (action.type) {
+    case 'start':   return { ...state, loading: true, error: null };
+    case 'success': return { data: action.data, loading: false, error: null };
+    case 'error':   return { ...state, loading: false, error: action.message };
+    default:        return state;
+  }
 }
 
 function isAbortError(err: unknown): boolean {
@@ -20,29 +35,28 @@ export function useFetch<T>(
   initialData: T,
   errorMessage = 'Failed to load data.'
 ): UseFetchResult<T> {
-  const [data, setData] = useState<T>(initialData);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [state, dispatch] = useReducer(fetchReducer<T>, {
+    data: initialData,
+    loading: true,
+    error: null,
+  });
 
   useEffect(() => {
     const controller = new AbortController();
-    setLoading(true);
-    setError(null);
+    dispatch({ type: 'start' });
 
     fetcher(controller.signal)
       .then((result) => {
-        if (!controller.signal.aborted) setData(result);
+        if (!controller.signal.aborted) dispatch({ type: 'success', data: result });
       })
       .catch((err) => {
-        if (!controller.signal.aborted && !isAbortError(err)) setError(errorMessage);
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setLoading(false);
+        if (!controller.signal.aborted && !isAbortError(err))
+          dispatch({ type: 'error', message: errorMessage });
       });
 
     return () => controller.abort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
 
-  return { data, loading, error };
+  return state;
 }

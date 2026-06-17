@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Table, Button, Badge, Alert, Loader, Group, Modal, Stack, Card, Text, Image } from '@mantine/core';
 import AdminLayout from './AdminLayout';
 import BookFormFields from './BookFormFields';
@@ -37,7 +37,11 @@ function AdminRequests() {
     [],
     'Could not fetch book requests.'
   );
-  const [requests, setRequests] = useState<BookRequestItem[]>([]);
+  const [overrides, setOverrides] = useState<Map<string, BookRequestItem>>(new Map());
+  const requests = useMemo(
+    () => fetchedRequests.map((r) => overrides.get(r._id) ?? r),
+    [fetchedRequests, overrides]
+  );
   const [updateError, setUpdateError] = useState(false);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
@@ -50,16 +54,12 @@ function AdminRequests() {
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
 
-  useEffect(() => {
-    setRequests(fetchedRequests);
-  }, [fetchedRequests]);
-
   const handleStatusChange = async (id: string, status: 'approved' | 'rejected') => {
     setUpdatingId(id);
     setUpdateError(false);
     try {
       const updated = await updateBookRequestStatus(id, status);
-      setRequests((prev) => prev.map((r) => (r._id === id ? updated : r)));
+      setOverrides((prev) => new Map(prev).set(updated._id, updated));
     } catch {
       setUpdateError(true);
     } finally {
@@ -117,7 +117,7 @@ function AdminRequests() {
     try {
       await createBook(bookForm);
       const updated = await updateBookRequestStatus(approveTarget._id, 'approved');
-      setRequests((prev) => prev.map((r) => (r._id === updated._id ? updated : r)));
+      setOverrides((prev) => new Map(prev).set(updated._id, updated));
       closeApprove();
     } catch {
       setSaveError('Failed to add the book. Please check the fields and try again.');

@@ -1,3 +1,8 @@
+if (process.env.NODE_ENV === 'production') {
+  console.error('Seed scripts must not run against a production database.');
+  process.exit(1);
+}
+
 import connectDB from '../config/db';
 import { Book } from '../modules/books/book.model';
 import { Store } from '../modules/stores/store.model';

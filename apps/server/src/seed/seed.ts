@@ -6,6 +6,11 @@ import { books } from './books.data';
 //   (no flag)   - seed only if the books collection is empty (same as --if-empty)
 //   --if-empty  - only seed when the books collection is empty
 //   --fresh     - delete existing books, then reseed
+if (process.env.NODE_ENV === 'production') {
+  console.error('Seed scripts must not run against a production database.');
+  process.exit(1);
+}
+
 const args = process.argv.slice(2);
 const fresh = args.includes('--fresh');
 
