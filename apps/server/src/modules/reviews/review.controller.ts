@@ -5,13 +5,13 @@ import * as reviewService from './review.service';
 
 // GET /api/books/:bookId/reviews
 export const getBookReviews = asyncHandler(async (req: Request, res: Response) => {
-  const reviews = await reviewService.getBookReviews(req.params.bookId);
+  const reviews = await reviewService.getBookReviews(req.params.bookId as string);
   res.status(200).json(reviews);
 });
 
 // POST /api/books/:bookId/reviews
 export const upsertBookReview = asyncHandler(async (req: Request, res: Response) => {
-  const { bookId } = req.params;
+  const bookId = req.params.bookId as string;
   const { rating, comment } = req.body;
 
   const { review, ratingAverage, ratingCount } = await reviewService.upsertBookReview(
@@ -23,12 +23,7 @@ export const upsertBookReview = asyncHandler(async (req: Request, res: Response)
 
   const io = getIO();
   if (io) {
-    io.to(`book:${bookId}`).emit('review:updated', {
-      bookId,
-      review,
-      ratingAverage,
-      ratingCount,
-    });
+    io.to(`book:${bookId}`).emit('review:updated', { bookId, review, ratingAverage, ratingCount });
   }
 
   res.status(200).json({ review, ratingAverage, ratingCount });

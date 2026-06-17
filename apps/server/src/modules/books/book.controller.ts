@@ -20,7 +20,7 @@ export const getRecommendations = asyncHandler(async (req: Request, res: Respons
 
 // GET /api/books/:id/related
 export const getRelatedBooks = asyncHandler(async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const id = req.params.id as string;
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
     res.status(400).json({ message: 'Invalid book id' });
@@ -38,7 +38,7 @@ export const getRelatedBooks = asyncHandler(async (req: Request, res: Response) 
 
 // GET /api/books/:id/stores
 export const getBookStores = asyncHandler(async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const id = req.params.id as string;
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
     res.status(400).json({ message: 'Invalid book id' });
@@ -51,7 +51,7 @@ export const getBookStores = asyncHandler(async (req: Request, res: Response) =>
 
 // GET /api/books/:id
 export const getBookById = asyncHandler(async (req: Request, res: Response) => {
-  const book = await bookService.getBookById(req.params.id);
+  const book = await bookService.getBookById(req.params.id as string);
   if (!book) {
     res.status(404).json({ message: 'Book not found' });
     return;
@@ -68,15 +68,7 @@ export const createBook = asyncHandler(async (req: Request, res: Response) => {
     return;
   }
 
-  const newBook = await bookService.createBook({
-    title,
-    author,
-    description,
-    price,
-    category,
-    image,
-    stock,
-  });
+  const newBook = await bookService.createBook({ title, author, description, price, category, image, stock });
   res.status(201).json(newBook);
 });
 
@@ -84,14 +76,8 @@ export const createBook = asyncHandler(async (req: Request, res: Response) => {
 export const updateBook = asyncHandler(async (req: Request, res: Response) => {
   const { title, author, description, price, category, image, stock } = req.body;
 
-  const updated = await bookService.updateBook(req.params.id, {
-    title,
-    author,
-    description,
-    price,
-    category,
-    image,
-    stock,
+  const updated = await bookService.updateBook(req.params.id as string, {
+    title, author, description, price, category, image, stock,
   });
 
   if (!updated) {
@@ -103,7 +89,7 @@ export const updateBook = asyncHandler(async (req: Request, res: Response) => {
 
 // DELETE /api/books/:id (admin)
 export const deleteBook = asyncHandler(async (req: Request, res: Response) => {
-  const book = await bookService.deleteBook(req.params.id);
+  const book = await bookService.deleteBook(req.params.id as string);
   if (!book) {
     res.status(404).json({ message: 'Book not found' });
     return;

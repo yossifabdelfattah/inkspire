@@ -10,6 +10,6 @@ export const createReservation = asyncHandler(async (req: Request, res: Response
 
 // GET /api/reservations/:id
 export const getReservation = asyncHandler(async (req: Request, res: Response) => {
-  const reservation = await reservationService.getReservation(req.params.id, req.user);
+  const reservation = await reservationService.getReservation(req.params.id as string, req.user);
   res.status(200).json(reservation);
 });

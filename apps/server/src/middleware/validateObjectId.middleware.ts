@@ -6,7 +6,7 @@ import mongoose from 'mongoose';
 export const validateObjectId =
   (paramName = 'id') =>
   (req: Request, res: Response, next: NextFunction) => {
-    if (!mongoose.Types.ObjectId.isValid(req.params[paramName])) {
+    if (!mongoose.Types.ObjectId.isValid(req.params[paramName] as string)) {
       return res.status(400).json({ message: `Invalid ${paramName}` });
     }
     next();

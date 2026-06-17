@@ -13,7 +13,6 @@ export const createBookRequest = asyncHandler(async (req: Request, res: Response
 
   const uid = req.user?.uid ?? null;
   const result = await bookRequestService.createBookRequest(title, author, note, uid);
-
   res.status(result.status).json({ message: result.message, request: result.request });
 });
 
@@ -23,7 +22,7 @@ export const getBookRequests = asyncHandler(async (req: Request, res: Response) 
   res.status(200).json(requests);
 });
 
-// PATCH /api/book-requests/:id (admin) — approve or reject a request
+// PATCH /api/book-requests/:id (admin)
 export const updateBookRequestStatus = asyncHandler(async (req: Request, res: Response) => {
   const { status } = req.body;
 
@@ -32,18 +31,17 @@ export const updateBookRequestStatus = asyncHandler(async (req: Request, res: Re
     return;
   }
 
-  const request = await bookRequestService.updateBookRequestStatus(req.params.id, status);
+  const request = await bookRequestService.updateBookRequestStatus(req.params.id as string, status);
   if (!request) {
     res.status(404).json({ message: 'Book request not found' });
     return;
   }
-
   res.status(200).json(request);
 });
 
-// GET /api/book-requests/:id/candidates (admin) — metadata suggestions for prefilling "Add Book"
+// GET /api/book-requests/:id/candidates (admin)
 export const getBookRequestCandidates = asyncHandler(async (req: Request, res: Response) => {
-  const request = await bookRequestService.findBookRequestById(req.params.id);
+  const request = await bookRequestService.findBookRequestById(req.params.id as string);
   if (!request) {
     res.status(404).json({ message: 'Book request not found' });
     return;
